@@ -233,10 +233,6 @@ readCSVFile(
     console.log(data);
 
     const banner = new Banner();
-    banner.adjustSettingsHeight();
-    window.addEventListener("resize", () => {
-      banner.adjustSettingsHeight();
-    });
   })
   .catch((error) => {
     console.error(error);
