@@ -41,6 +41,7 @@ class Banner {
     this.blockCookies();
     this.createEventListeners();
     this.hideElement(this.bannerContainer);
+    this.checkCookie();
   }
 
   initialize() {
