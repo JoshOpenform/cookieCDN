@@ -306,6 +306,7 @@ readCSVFile(
   .then((data) => {
     const banner = new Banner();
     banner.cookieCategories = banner.categorizeData(data);
+  document.cookie = "test=hello";
   })
   .catch((error) => {
     console.error(error);
