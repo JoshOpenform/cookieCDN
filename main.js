@@ -10,6 +10,10 @@ class Banner {
   closeButton;
   pendingCookies;
 
+  localCookies;
+  cookieCategories;
+  categorizedCookies;
+
   constructor() {
     this.initialize();
     this.bannerContainer = document.querySelector(
@@ -57,10 +61,10 @@ class Banner {
 
     const banner = `
           <div class='ofc-message-container'>
-              <p>This is the Message container</p>
+              <p>By clicking "Accept All Cookies", you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our marketing efforts.</p>
           </div>
           <div class='ofc-button-container'>
-              <button data-item='js-settings-button' type='button' class='ofc-button'>Cookie Settings</button>
+              <button data-item='js-settings-button' type='button' class='ofc-button' style='display: none;'>Cookie Settings</button>
               <button data-item='js-reject-button' type='button' class='ofc-button'>Reject All</button>
               <button data-item='js-accept-button' type='button' class='ofc-button'>Accept All</button>
           </div>
@@ -83,10 +87,6 @@ class Banner {
               <div class='ofc-accordion'>
                 <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
                     <p>Strictly Necessary Cookies</p>
-                    <label class="ofc-toggle-switch">
-                        <input type="checkbox">
-                        <span class="ofc-toggle-slider"></span>
-                    </label>
                 </div>            
                 <div class='ofc-accordion-body' style='display:none;'>
                     <p>Explainer about above cookies</p>
@@ -95,20 +95,12 @@ class Banner {
               <div class='ofc-accordion'>
                 <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
                     <p>Performance Cookies</p>
-                    <label class="ofc-toggle-switch">
-                        <input type="checkbox">
-                        <span class="ofc-toggle-slider"></span>
-                    </label>
                 </div>       
                 <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
               </div>
               <div class='ofc-accordion'>
                 <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
                     <p>Marketing Cookies</p>
-                    <label class="ofc-toggle-switch">
-                        <input type="checkbox">
-                        <span class="ofc-toggle-slider"></span>
-                    </label>
                 </div>       
                 <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
               </div>
@@ -141,6 +133,9 @@ class Banner {
     this.acceptButton.addEventListener("click", () => {
       this.handleConsent();
     });
+    this.rejectButton.addEventListener("click", () => {
+      this.handleRejection();
+    });
   }
 
   initializeAccordions() {
@@ -155,11 +150,49 @@ class Banner {
 
   blockCookies() {
     this.pendingCookies = document.cookie.split(";");
+    this.categorizedCookies = this.categorizeSiteCookies(
+      this.pendingCookies,
+      this.cookieCategories
+    );
     document.cookie = "";
     Object.defineProperty(document, "cookie", {
       get: function () {},
       set: function () {},
     });
+  }
+
+  categorizeData(dataArray) {
+    // Create an object to hold arrays for each category
+    let categorizedArrays = {};
+
+    // Iterate through the dataArray
+    for (let item of dataArray) {
+      // If this category doesn't exist yet, create an empty array for it
+      if (!categorizedArrays[item.Category]) {
+        categorizedArrays[item.Category] = [];
+      }
+      // Push the item into its category's array
+      categorizedArrays[item.Category].push(item);
+    }
+
+    // Return the object containing the categorized arrays
+    return categorizedArrays;
+  }
+
+  getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(";");
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == " ") {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
   }
 
   setCookie(cname, cvalue, exdays) {
@@ -171,17 +204,57 @@ class Banner {
 
   handleConsent() {
     this.setCookie("consent", "true", 7);
-    for (var i = 0; i < this.pendingCookies.length; i++) {
+    for (let i = 0; i < this.pendingCookies.length; i++) {
       document.cookie = this.pendingCookies[i];
     }
     this.pendingCookies = [];
+    this.hideElement(this.bannerContainer);
+  }
+
+  handleRejection() {
+    this.setCookie("consent", "false", 7);
+    this.pendingCookies = [];
+    this.hideElement(this.bannerContainer);
   }
 
   checkCookie() {
-    let consent = getCookie("consent");
-    if (consent != "") {
+    let consent = this.getCookie("consent");
+    if (consent === "") {
       this.showElement(this.bannerContainer);
     }
+  }
+
+  categorizeSiteCookies(siteCookies, categorizedArrays) {
+    // This object will hold the categorized site cookies
+    let categorizedSiteCookies = {};
+
+    // Iterate through the site cookies
+    for (let cookie of siteCookies) {
+      // Check if the cookie's 'Data Key name' exists in each category
+      for (let category in categorizedArrays) {
+        // Find the matching cookie in this category
+        let matchingCookie = categorizedArrays[category].find(
+          (item) =>
+            item["Cookie / Data Key name"] === cookie["Cookie / Data Key name"]
+        );
+
+        // If a matching cookie was found, add this cookie to the categorized site cookies
+        if (matchingCookie) {
+          // If this category doesn't exist yet in the categorized site cookies, create it
+          if (!categorizedSiteCookies[category]) {
+            categorizedSiteCookies[category] = [];
+          }
+
+          // Add the cookie to its category
+          categorizedSiteCookies[category].push(cookie);
+
+          // No need to check the other categories
+          break;
+        }
+      }
+    }
+
+    return categorizedSiteCookies;
   }
 }
 
@@ -231,9 +304,8 @@ readCSVFile(
   "https://raw.githubusercontent.com/jkwakman/Open-Cookie-Database/master/open-cookie-database.csv"
 )
   .then((data) => {
-    console.log(data);
-
     const banner = new Banner();
+    banner.cookieCategories = banner.categorizeData(data);
   })
   .catch((error) => {
     console.error(error);
