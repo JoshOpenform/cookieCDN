@@ -1,3 +1,8 @@
+h1{
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  text-align: center;
+}
+
 .ofc-banner-container {
   display: none;
   flex-wrap: wrap;
@@ -9,8 +14,9 @@
   justify-content: space-around;
   z-index: 10000;
   min-height: 100px;
-  background-color: slateblue;
+  background-color: #C37B89;
   align-items: center;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 .ofc-banner-container.visible {
