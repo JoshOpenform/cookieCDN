@@ -217,7 +217,6 @@ class Banner {
     this.setCookie("MSNRPSAuth","test",7);
     this.pendingCookies = document.cookie.split(";");
     document.cookie = "";
-    this.pendingCookies = [];
   }
 
   getCookie(cname) {
