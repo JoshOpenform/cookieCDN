@@ -217,9 +217,11 @@ class Banner {
     this.setCookie("MSNRPSAuth","test",7);
     this.pendingCookies = document.cookie.split(";");
     for(let i = 0; i < this.pendingCookies.length; i++){
-      document.cookie = this.pendingCookies[i] + "=; expires="+ new Date(0).toUTCString();
+      let cookieName = this.pendingCookies[i].split("=")[0]; // get name of cookie
+      document.cookie = cookieName + "=; expires="+ new Date(0).toUTCString() + "; path=/; domain=" + window.location.hostname;
     }
   }
+  
 
   getCookie(cname) {
     let name = cname + "=";
