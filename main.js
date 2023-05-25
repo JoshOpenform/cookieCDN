@@ -218,7 +218,7 @@ class Banner {
     this.pendingCookies = document.cookie.split(";");
     for(let i = 0; i < this.pendingCookies.length; i++){
       let cookieName = this.pendingCookies[i].split("=")[0]; // get name of cookie
-      document.cookie = cookieName + "=; expires="+ new Date(0).toUTCString() + "; path=/; domain=" + window.location.hostname;
+      document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     }
   }
   
