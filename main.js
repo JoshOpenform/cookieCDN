@@ -142,7 +142,7 @@ class Banner {
       let cookieName = cookie.split("=")[0].trim();
 
       let cookieEntry = data.find(
-        (entry) => entry["Cookie Name"] && entry["Cookie Name"].trim() === cookieName
+        (entry) => entry["Cookie / Data Key name	"] && entry["Cookie / Data Key name	"].trim() === cookieName
       );
       
       if (cookieEntry) {
