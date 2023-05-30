@@ -12,10 +12,23 @@ class Banner {
   confirmButton;
   csvData;
 
+  sNC;
+  pC;
+  fC;
+  mC
+  aC;
+
   categorizedCookies;
   acceptedCategories;
 
   constructor(data) {
+    this.sNC = false;
+    this.pC = false;
+    this.tC = false;
+    this.fC = false;
+    this.mC = false;
+    this.aC = false;
+
     this.csvData = data;
     this.blockCookies();
     this.categorizeCookies(data);
@@ -94,7 +107,7 @@ class Banner {
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
               <p>Strictly Necessary Cookies</p>
-              <label class="ofc-toggle-switch">
+              <label class="ofc-toggle-switch" data-item="js-toggle-sNC">
               <input type="checkbox">
               <span class="ofc-toggle-slider"></span>
             </label>
@@ -106,7 +119,7 @@ class Banner {
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
               <p>Performance Cookies</p>
-              <label class="ofc-toggle-switch">
+              <label class="ofc-toggle-switch data-item="js-toggle-pC"">
               <input type="checkbox">
               <span class="ofc-toggle-slider"></span>
             </label>
@@ -116,7 +129,27 @@ class Banner {
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
               <p>Marketing Cookies</p>
-              <label class="ofc-toggle-switch">
+              <label class="ofc-toggle-switch" data-item="js-toggle-mC">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+        </div>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Functional Cookies</p>
+              <label class="ofc-toggle-switch" data-item="js-toggle-fC">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+        </div>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Analytic Cookies</p>
+              <label class="ofc-toggle-switch" data-item="js-toggle-aC">
               <input type="checkbox">
               <span class="ofc-toggle-slider"></span>
             </label>
@@ -291,7 +324,40 @@ class Banner {
   }
 
   updatePreference() {
-    
+    this.blockCookies();
+    let appovedCookies = [];
+    let sNCToggle = document.querySelector("[data-item='js-toggle-sNC'] input");
+    let pCToggle = document.querySelector("[data-item='js-toggle-pC'] input");
+    let aCToggle = document.querySelector("[data-item='js-toggle-aC'] input");
+    let mCToggle = document.querySelector("[data-item='js-toggle-mC'] input");
+    let fCToggle = document.querySelector("[data-item='js-toggle-fC'] input");
+
+    sNCToggle.checked ? appovedCookies.push("Strictly") : "";
+    pCToggle.checked ? appovedCookies.push("Performance") : "";
+    aCToggle.checked ? appovedCookies.push("Analytics") : "";
+    mCToggle.checked ? appovedCookies.push("Marketing") : "";
+    fCToggle.checked ? appovedCookies.push("Functional") : "";
+
+    if (sNCToggle.checked && categorizeCookies["Strictly"]) {
+      approvedCookies.push(...categorizeCookies["Strictly"]);
+    }
+    if (pCToggle.checked && categorizeCookies["Performance"]) {
+      approvedCookies.push(...categorizeCookies["Performance"]);
+    }
+    if (aCToggle.checked && categorizeCookies["Analytics"]) {
+      approvedCookies.push(...categorizeCookies["Analytics"]);
+    }
+    if (mCToggle.checked && categorizeCookies["Marketing"]) {
+      approvedCookies.push(...categorizeCookies["Marketing"]);
+    }
+    if (fCToggle.checked && categorizeCookies["Functional"]) {
+      approvedCookies.push(...categorizeCookies["Functional"]);
+    }
+  
+    // Add the approved cookies to document.cookie
+    approvedCookies.forEach(cookie => {
+      document.cookie = cookie;
+    });
   }
 }
 
