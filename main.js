@@ -30,9 +30,7 @@ class Banner {
     this.aC = false;
 
     this.csvData = data;
-    if(!this.checkCookie()){
-      this.blockCookies();
-    }
+    this.blockCookies();
     this.categorizeCookies(data);
     this.initialize();
     this.bannerContainer = document.querySelector(
@@ -66,6 +64,9 @@ class Banner {
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
     this.hideElement(this.bannerContainer);
+    if(this.checkCookie){
+      this.handleConsent();
+    }
   }
 
   initialize() {
