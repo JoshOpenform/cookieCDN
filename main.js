@@ -300,7 +300,7 @@ class Banner {
       expires = "; expires=" + date.toUTCString();
     }
 
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/cookieCDN";
   }
 
   handleConsent() {
