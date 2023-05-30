@@ -64,7 +64,7 @@ class Banner {
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
     this.hideElement(this.bannerContainer);
-    (this.checkCookie === "yes") ? this.handleConsent() : this.handleRejection();
+    (this.checkCookie === "yes" && this.checkCookie !== "") ? this.handleConsent() : this.handleRejection();
   }
 
   initialize() {
