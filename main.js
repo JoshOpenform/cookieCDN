@@ -266,6 +266,9 @@ class Banner {
     try {
       for (let i = 0; i < this.pendingCookies.length; i++) {
         let cookieName = this.pendingCookies[i].split("=")[0]; // get name of cookie
+        if(cookieName === "ofcPer"){
+          continue;
+        }
         document.cookie =
           cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       }
