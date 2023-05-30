@@ -216,6 +216,17 @@ class Banner {
   }
 
   blockCookies() {
+        this.setCookie("_ga", "test", 7);
+    this.setCookie("_ga_", "test", 7);
+    this.setCookie("_gid", "test", 7);
+    this.setCookie("_gat", "test", 7);
+    this.setCookie("_dc_gtm_", "test", 7);
+    this.setCookie("demdex", "test", 7);
+    this.setCookie("dextp", "test", 7);
+    this.setCookie("dst", "test", 7);
+    this.setCookie("MSPAuth", "test", 7);
+    this.setCookie("PPAuth", "test", 7);
+    this.setCookie("MSNRPSAuth", "test", 7);
     this.pendingCookies = document.cookie.split(";");
     try {
       for (let i = 0; i < this.pendingCookies.length; i++) {
