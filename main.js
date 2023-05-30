@@ -64,9 +64,7 @@ class Banner {
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
     this.hideElement(this.bannerContainer);
-    if(this.checkCookie){
-      this.handleConsent();
-    }
+    (this.checkCookie === "yes") ? this.handleConsent() : this.handleRejection();
   }
 
   initialize() {
@@ -323,9 +321,8 @@ class Banner {
     let consent = this.getCookie("ofcPer");
     if (consent === "") {
       this.showElement(this.bannerContainer);
-      return false;
     }
-    return true;
+    return consent;
   }
 
   updatePreference() {
