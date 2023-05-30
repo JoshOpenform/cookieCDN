@@ -30,7 +30,9 @@ class Banner {
     this.aC = false;
 
     this.csvData = data;
-    this.blockCookies();
+    if(!this.checkCookie()){
+      this.blockCookies();
+    }
     this.categorizeCookies(data);
     this.initialize();
     this.bannerContainer = document.querySelector(
@@ -64,7 +66,6 @@ class Banner {
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
     this.hideElement(this.bannerContainer);
-    this.checkCookie();
   }
 
   initialize() {
@@ -321,7 +322,9 @@ class Banner {
     let consent = this.getCookie("ofcPer");
     if (consent === "") {
       this.showElement(this.bannerContainer);
+      return false;
     }
+    return true;
   }
 
   updatePreference() {
