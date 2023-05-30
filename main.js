@@ -119,7 +119,7 @@ class Banner {
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
               <p>Performance Cookies</p>
-              <label class="ofc-toggle-switch data-item="js-toggle-pC"">
+              <label class="ofc-toggle-switch data-item="js-toggle-pC">
               <input type="checkbox">
               <span class="ofc-toggle-slider"></span>
             </label>
