@@ -174,9 +174,10 @@ class Banner {
           categorizedCookies["Other"].push(cookie);
         }
       });
-    } catch (e) {}
-    this.categorizeCookies = categorizedCookies;
+      this.categorizeCookies = categorizedCookies;
     console.log(this.categorizeCookies);
+    } catch (e) {}
+    
   }
 
   createEventListeners() {
