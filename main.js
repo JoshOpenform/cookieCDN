@@ -326,6 +326,7 @@ class Banner {
 
   updatePreference() {
     this.blockCookies();
+    this.setCookie("ofcPer", "yes", 7);
     let approvedCookies = [];
     let cookieList = [];
     let sNCToggle = document.querySelector("[data-item='js-toggle-sNC'] input");
