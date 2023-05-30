@@ -10,8 +10,14 @@ class Banner {
   closeButton;
   pendingCookies;
   confirmButton;
+  csvData;
 
-  constructor() {
+  categorizedCookies;
+  acceptedCategories;
+
+  constructor(data) {
+    this.csvData = data;
+    this.categorizeCookies(data);
     this.initialize();
     this.bannerContainer = document.querySelector(
       "[data-item='js-banner-container']"
@@ -43,6 +49,7 @@ class Banner {
     this.initializeAccordions();
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
+    this.blockCookies();
     this.hideElement(this.bannerContainer);
     this.checkCookie();
   }
@@ -59,68 +66,69 @@ class Banner {
     settingsNode.setAttribute("data-item", "js-settings-container");
 
     const banner = `
-          <div class='ofc-message-container'>
-              <p>By clicking "Accept All Cookies", you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our marketing efforts.</p>
-          </div>
-          <div class='ofc-button-container'>
-              <button data-item='js-settings-button' type='button' class='ofc-button'>Cookie Settings</button>
-              <button data-item='js-reject-button' type='button' class='ofc-button'>Reject All</button>
-              <button data-item='js-accept-button' type='button' class='ofc-button'>Accept All</button>
-          </div>
-          <div class='ofc-close-container'>
-              <button class='ofc-button ofc-close' data-item='js-close-button'>X</button>
-          </div>
-          `;
+    <div class='ofc-message-container'>
+        <p>By clicking "Accept All Cookies", you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our marketing efforts.</p>
+    </div>
+    <div class='ofc-button-container'>
+        <button data-item='js-settings-button' type='button' class='ofc-button'>Cookie Settings</button>
+        <button data-item='js-reject-button' type='button' class='ofc-button'>Reject All</button>
+        <button data-item='js-accept-button' type='button' class='ofc-button'>Accept All</button>
+    </div>
+    <div class='ofc-close-container'>
+        <button class='ofc-button ofc-close' data-item='js-close-button'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"> <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/> </svg></button>
+    </div>
+    `;
 
     const settings = `
-        <div data-item='js-settings-content' class='ofc-settings-content'>
-          <div class='ofc-settings-content-header'>
-            <p>Privacy Preference Center</p>
-            <button class='ofc-button ofc-close' data-item='js-settings-close-button'>X</button>
+  <div data-item='js-settings-content' class='ofc-settings-content'>
+  <img src="images/cookieJar.jpg" class="cookieJar-logo" />
+    <div class='ofc-settings-content-header'>
+      <p>Privacy Preference Center</p>
+      <button class='ofc-close ofc-popclose' data-item='js-settings-close-button'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"> <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/> </svg></button>
+    </div>
+    <div>
+        <p class="ofc-privacytext">When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to. The information does not usually directly identify you, but it can give you a more personalized web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. Click on the different category headings to find out more and change our default settings. However, blocking some types of cookies may impact your experience of the site and the services we are able to offer.</p>
+        <button class='ofc-popbutton' data-item='js-accept-button'>Allow All</button>
+    </div>
+    <div class='ofc-settings'>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Strictly Necessary Cookies</p>
+              <label class="ofc-toggle-switch">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>            
+          <div class='ofc-accordion-body' style='display:none;'>
+              <p>Explainer about above cookies</p>
           </div>
-          <div>
-              <p>When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to. The information does not usually directly identify you, but it can give you a more personalized web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. Click on the different category headings to find out more and change our default settings. However, blocking some types of cookies may impact your experience of the site and the services we are able to offer.</p>
-              <button class='ofc-button' data-item='js-accept-button'>Allow All</button>
-          </div>
-          <div class='ofc-settings'>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Strictly Necessary Cookies</p>
-                    <label class="ofc-toggle-switch">
-                    <input type="checkbox">
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>            
-                <div class='ofc-accordion-body' style='display:none;'>
-                    <p>Explainer about above cookies</p>
-                </div>
-              </div>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Performance Cookies</p>
-                    <label class="ofc-toggle-switch">
-                    <input type="checkbox">
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>       
-                <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
-              </div>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Marketing Cookies</p>
-                    <label class="ofc-toggle-switch">
-                    <input type="checkbox">
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>       
-                <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
-              </div>
-          </div>
-          <div>
-          <button class='ofc-button' data-item='js-reject-button'>Reject All</button>
-          <button class='ofc-button' data-item='js-confirm-button'>Confirm My Choices</button>
-          </div>
-          </div>`;
+        </div>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Performance Cookies</p>
+              <label class="ofc-toggle-switch">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+        </div>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Marketing Cookies</p>
+              <label class="ofc-toggle-switch">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+        </div>
+    </div>
+    <div>
+    <button class='ofc-popbutton' data-item='js-reject-button'>Reject All</button>
+    <button class='ofc-popbutton' data-item='js-confirm-button'>Confirm My Choices</button>
+    </div>
+    </div>`;
     containerNode.innerHTML = banner;
     settingsNode.innerHTML = settings;
     document.body.appendChild(containerNode);
@@ -137,34 +145,37 @@ class Banner {
 
   categorizeCookies(data) {
     let categorizedCookies = {};
+    try {
+      this.pendingCookies.forEach((cookie) => {
+        let cookieName = cookie.split("=")[0].trim();
 
-    this.pendingCookies.forEach((cookie) => {
-      let cookieName = cookie.split("=")[0].trim();
+        let cookieEntry = data.find(
+          (entry) =>
+            entry["Cookie / Data Key name"] &&
+            entry["Cookie / Data Key name"].trim() === cookieName
+        );
 
-      let cookieEntry = data.find(
-        (entry) => entry["Cookie / Data Key name"] && entry["Cookie / Data Key name"].trim() === cookieName
-      );
-      
-      if (cookieEntry) {
-        let category = cookieEntry["Category"];
+        if (cookieEntry) {
+          let category = cookieEntry["Category"];
 
-        // If the category doesn't exist yet, create it
-        if (!categorizedCookies[category]) {
-          categorizedCookies[category] = [];
+          // If the category doesn't exist yet, create it
+          if (!categorizedCookies[category]) {
+            categorizedCookies[category] = [];
+            this.acceptedCategories.push(category);
+          }
+
+          categorizedCookies[category].push(cookie);
+        } else {
+          // If "Other" category doesn't exist yet, create it
+          if (!categorizedCookies["Other"]) {
+            categorizedCookies["Other"] = [];
+          }
+
+          categorizedCookies["Other"].push(cookie);
         }
-
-        categorizedCookies[category].push(cookie);
-      } else {
-        // If "Other" category doesn't exist yet, create it
-        if (!categorizedCookies["Other"]) {
-          categorizedCookies["Other"] = [];
-        }
-
-        categorizedCookies["Other"].push(cookie);
-      }
-    });
-
-    return categorizedCookies;
+      });
+    } catch (e) {}
+    this.categorizeCookies = categorizedCookies;
   }
 
   createEventListeners() {
@@ -204,24 +215,15 @@ class Banner {
   }
 
   blockCookies() {
-    this.setCookie("_ga","test",7);
-    this.setCookie("_ga_","test",7);
-    this.setCookie("_gid","test",7);
-    this.setCookie("_gat","test",7);
-    this.setCookie("_dc_gtm_","test",7);
-    this.setCookie("demdex","test",7);
-    this.setCookie("dextp","test",7);
-    this.setCookie("dst","test",7);
-    this.setCookie("MSPAuth","test",7);
-    this.setCookie("PPAuth","test",7);
-    this.setCookie("MSNRPSAuth","test",7);
     this.pendingCookies = document.cookie.split(";");
-    for(let i = 0; i < this.pendingCookies.length; i++){
-      let cookieName = this.pendingCookies[i].split("=")[0]; // get name of cookie
-      document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
+    try {
+      for (let i = 0; i < this.pendingCookies.length; i++) {
+        let cookieName = this.pendingCookies[i].split("=")[0]; // get name of cookie
+        document.cookie =
+          cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      }
+    } catch (e) {}
   }
-  
 
   getCookie(cname) {
     let name = cname + "=";
@@ -274,6 +276,10 @@ class Banner {
       this.showElement(this.bannerContainer);
     }
   }
+
+  updatePreference() {
+    
+  }
 }
 
 function readCSVFile(fileUrl) {
@@ -322,10 +328,7 @@ readCSVFile(
   "https://raw.githubusercontent.com/jkwakman/Open-Cookie-Database/master/open-cookie-database.csv"
 )
   .then((data) => {
-    const banner = new Banner();
-    banner.blockCookies();
-    let categorizedCookies = banner.categorizeCookies(data);
-    console.log(categorizedCookies);
+    const banner = new Banner(data);
   })
   .catch((error) => {
     console.error(error);
