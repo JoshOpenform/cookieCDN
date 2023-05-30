@@ -176,6 +176,7 @@ class Banner {
       });
     } catch (e) {}
     this.categorizeCookies = categorizedCookies;
+    console.log(this.categorizeCookies);
   }
 
   createEventListeners() {
