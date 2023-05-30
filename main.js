@@ -339,20 +339,20 @@ class Banner {
     mCToggle.checked ? appovedCookies.push("Marketing") : "";
     fCToggle.checked ? appovedCookies.push("Functional") : "";
 
-    if (sNCToggle.checked && categorizeCookies["Strictly"]) {
-      approvedCookies.push(...categorizeCookies["Strictly"]);
+    if (sNCToggle.checked && this.categorizeCookies["Strictly"]) {
+      approvedCookies.push(...this.categorizeCookies["Strictly"]);
     }
-    if (pCToggle.checked && categorizeCookies["Performance"]) {
-      approvedCookies.push(...categorizeCookies["Performance"]);
+    if (pCToggle.checked && this.categorizeCookies["Performance"]) {
+      approvedCookies.push(...this.categorizeCookies["Performance"]);
     }
-    if (aCToggle.checked && categorizeCookies["Analytics"]) {
-      approvedCookies.push(...categorizeCookies["Analytics"]);
+    if (aCToggle.checked && this.categorizeCookies["Analytics"]) {
+      approvedCookies.push(...this.categorizeCookies["Analytics"]);
     }
-    if (mCToggle.checked && categorizeCookies["Marketing"]) {
-      approvedCookies.push(...categorizeCookies["Marketing"]);
+    if (mCToggle.checked && this.categorizeCookies["Marketing"]) {
+      approvedCookies.push(...this.categorizeCookies["Marketing"]);
     }
-    if (fCToggle.checked && categorizeCookies["Functional"]) {
-      approvedCookies.push(...categorizeCookies["Functional"]);
+    if (fCToggle.checked && this.categorizeCookies["Functional"]) {
+      approvedCookies.push(...this.categorizeCookies["Functional"]);
     }
   
     // Add the approved cookies to document.cookie
