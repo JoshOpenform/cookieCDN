@@ -353,7 +353,7 @@ class Banner {
       cookieList.push(...this.categorizeCookies["Marketing"]);
     }
     if (fCToggle.checked && this.categorizeCookies["Functional"]) {
-      approvedCcookieListookies.push(...this.categorizeCookies["Functional"]);
+      cookieList.push(...this.categorizeCookies["Functional"]);
     }
   
     // Add the approved cookies to document.cookie
