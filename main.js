@@ -161,7 +161,7 @@ class Banner {
           // If the category doesn't exist yet, create it
           if (!categorizedCookies[category]) {
             categorizedCookies[category] = [];
-            this.acceptedCategories.push(category);
+           // this.acceptedCategories.push(category);
           }
 
           categorizedCookies[category].push(cookie);
