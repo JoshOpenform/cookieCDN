@@ -17,6 +17,7 @@ class Banner {
 
   constructor(data) {
     this.csvData = data;
+    this.blockCookies();
     this.categorizeCookies(data);
     this.initialize();
     this.bannerContainer = document.querySelector(
@@ -49,7 +50,6 @@ class Banner {
     this.initializeAccordions();
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
-    this.blockCookies();
     this.hideElement(this.bannerContainer);
     this.checkCookie();
   }
