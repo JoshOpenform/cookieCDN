@@ -265,7 +265,7 @@ class Banner {
     this.pendingCookies = document.cookie.split(";");
     try {
       for (let i = 0; i < this.pendingCookies.length; i++) {
-        let cookieName = this.pendingCookies[i].split("=")[0]; // get name of cookie
+        let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
         if(cookieName === "ofcPer"){
           continue;
         }
