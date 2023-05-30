@@ -326,37 +326,38 @@ class Banner {
 
   updatePreference() {
     this.blockCookies();
-    let appovedCookies = [];
+    let approvedCookies = [];
+    let cookieList = [];
     let sNCToggle = document.querySelector("[data-item='js-toggle-sNC'] input");
     let pCToggle = document.querySelector("[data-item='js-toggle-pC'] input");
     let aCToggle = document.querySelector("[data-item='js-toggle-aC'] input");
     let mCToggle = document.querySelector("[data-item='js-toggle-mC'] input");
     let fCToggle = document.querySelector("[data-item='js-toggle-fC'] input");
 
-    sNCToggle.checked ? appovedCookies.push("Strictly") : "";
-    pCToggle.checked ? appovedCookies.push("Performance") : "";
-    aCToggle.checked ? appovedCookies.push("Analytics") : "";
-    mCToggle.checked ? appovedCookies.push("Marketing") : "";
-    fCToggle.checked ? appovedCookies.push("Functional") : "";
+    sNCToggle.checked ? approvedCookies.push("Strictly") : "";
+    pCToggle.checked ? approvedCookies.push("Performance") : "";
+    aCToggle.checked ? approvedCookies.push("Analytics") : "";
+    mCToggle.checked ? approvedCookies.push("Marketing") : "";
+    fCToggle.checked ? approvedCookies.push("Functional") : "";
 
     if (sNCToggle.checked && this.categorizeCookies["Strictly"]) {
-      approvedCookies.push(...this.categorizeCookies["Strictly"]);
+      cookieList.push(...this.categorizeCookies["Strictly"]);
     }
     if (pCToggle.checked && this.categorizeCookies["Performance"]) {
-      approvedCookies.push(...this.categorizeCookies["Performance"]);
+      cookieList.push(...this.categorizeCookies["Performance"]);
     }
     if (aCToggle.checked && this.categorizeCookies["Analytics"]) {
-      approvedCookies.push(...this.categorizeCookies["Analytics"]);
+      cookieList.push(...this.categorizeCookies["Analytics"]);
     }
     if (mCToggle.checked && this.categorizeCookies["Marketing"]) {
-      approvedCookies.push(...this.categorizeCookies["Marketing"]);
+      cookieList.push(...this.categorizeCookies["Marketing"]);
     }
     if (fCToggle.checked && this.categorizeCookies["Functional"]) {
-      approvedCookies.push(...this.categorizeCookies["Functional"]);
+      approvedCcookieListookies.push(...this.categorizeCookies["Functional"]);
     }
   
     // Add the approved cookies to document.cookie
-    approvedCookies.forEach(cookie => {
+    cookieList.forEach(cookie => {
       document.cookie = cookie;
     });
   }
