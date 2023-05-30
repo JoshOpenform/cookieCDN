@@ -270,7 +270,7 @@ class Banner {
           continue;
         }
         document.cookie =
-          cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/cookieCDN;";
+          cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       }
     } catch (e) {}
   }
@@ -300,7 +300,7 @@ class Banner {
       expires = "; expires=" + date.toUTCString();
     }
 
-    document.cookie = name + "=" + (value || "") + expires + "; path=/cookieCDN";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
   }
 
   handleConsent() {
