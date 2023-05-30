@@ -234,6 +234,7 @@ class Banner {
       });
     }
     this.confirmButton.addEventListener("click", () => {
+      this.updatePreference();
       this.hideElement(this.bannerContainer);
       this.hideElement(this.settingsMenu);
     });
