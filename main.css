@@ -16,7 +16,7 @@ h1 {
   bottom: 0;
   left: 0;
   padding-inline: 40px;
-  width: calc(100% - 100px);
+  width: calc(100% - 17px);
   justify-content: space-around;
   z-index: 10000;
   min-height: 100px;
@@ -178,6 +178,7 @@ h1 {
   transition: 0.2s;
   cursor: pointer;
   float: right;
+  max-width: 30px !important;
 }
 
 .ofc-close:hover {
