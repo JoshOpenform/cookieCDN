@@ -15,7 +15,7 @@ class Banner {
   sNC;
   pC;
   fC;
-  mC
+  mC;
   aC;
 
   categorizedCookies;
@@ -194,7 +194,7 @@ class Banner {
           // If the category doesn't exist yet, create it
           if (!categorizedCookies[category]) {
             categorizedCookies[category] = [];
-           // this.acceptedCategories.push(category);
+            // this.acceptedCategories.push(category);
           }
 
           categorizedCookies[category].push(cookie);
@@ -208,9 +208,8 @@ class Banner {
         }
       });
       this.categorizeCookies = categorizedCookies;
-    console.log(this.categorizeCookies);
+      console.log(this.categorizeCookies);
     } catch (e) {}
-    
   }
 
   createEventListeners() {
@@ -251,26 +250,16 @@ class Banner {
   }
 
   blockCookies() {
-        this.setCookie("_ga", "test", 7);
-    this.setCookie("_ga_", "test", 7);
-    this.setCookie("_gid", "test", 7);
-    this.setCookie("_gat", "test", 7);
-    this.setCookie("_dc_gtm_", "test", 7);
-    this.setCookie("demdex", "test", 7);
-    this.setCookie("dextp", "test", 7);
-    this.setCookie("dst", "test", 7);
-    this.setCookie("MSPAuth", "test", 7);
-    this.setCookie("PPAuth", "test", 7);
-    this.setCookie("MSNRPSAuth", "test", 7);
     this.pendingCookies = document.cookie.split(";");
     try {
       for (let i = 0; i < this.pendingCookies.length; i++) {
         let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
-        if(cookieName === "ofcPer"){
-          continue;
+        let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
+        if (cookieName === "ofcPer") {
+          cookieValue === "yes" ? this.handleConsent() : this.handleRejection();
+          break;
         }
-        document.cookie =
-          cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        this.setCookie(cookieName, "", -1);
       }
     } catch (e) {}
   }
@@ -305,7 +294,9 @@ class Banner {
 
   handleConsent() {
     for (let i = 0; i < this.pendingCookies.length; i++) {
-      document.cookie = this.pendingCookies[i];
+      let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
+      let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
+      this.setCookie(cookieName, cookieValue, 7);
     }
     this.pendingCookies = [];
     this.setCookie("ofcPer", "yes", 7);
@@ -314,6 +305,10 @@ class Banner {
   }
 
   handleRejection() {
+    for (let i = 0; i < this.pendingCookies.length; i++) {
+      let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
+      this.setCookie(cookieName, "", -1);
+    }
     this.setCookie("ofcPer", "no", 7);
     this.pendingCookies = [];
     this.hideElement(this.bannerContainer);
@@ -360,9 +355,9 @@ class Banner {
     if (fCToggle.checked && this.categorizeCookies["Functional"]) {
       cookieList.push(...this.categorizeCookies["Functional"]);
     }
-  
+
     // Add the approved cookies to document.cookie
-    cookieList.forEach(cookie => {
+    cookieList.forEach((cookie) => {
       document.cookie = cookie;
     });
   }
