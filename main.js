@@ -80,7 +80,8 @@ class Banner {
     containerNode.classList.add("ofc-banner-container");
     containerNode.classList.add("visible");
     containerNode.setAttribute("data-item", "js-banner-container");
-
+    containerNode.style.width = "calc(100% - 17px)";
+    
     cookieNode.classList.add("ofc-cookie-container");
     cookieNode.setAttribute("data-item", "js-cookie-container");
 
