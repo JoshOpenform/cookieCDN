@@ -179,6 +179,7 @@ h1 {
   cursor: pointer;
   float: right;
   max-width: 30px !important;
+  min-width: 30px !important;
 }
 
 .ofc-close:hover {
