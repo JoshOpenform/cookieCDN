@@ -12,6 +12,8 @@ class Banner {
   confirmButton;
   csvData;
 
+  cookieCrumb;
+
   sNC;
   pC;
   fC;
@@ -60,6 +62,9 @@ class Banner {
     this.confirmButton = document.querySelector(
       "[data-item='js-confirm-button']"
     );
+    this.cookieCrumb = document.querySelector(
+      "[data-item='js-cookie-container']"
+    );
     this.initializeAccordions();
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
@@ -70,13 +75,24 @@ class Banner {
   initialize() {
     const containerNode = document.createElement("div");
     const settingsNode = document.createElement("div");
+    const cookieNode = document.createElement("div");
 
     containerNode.classList.add("ofc-banner-container");
     containerNode.classList.add("visible");
     containerNode.setAttribute("data-item", "js-banner-container");
 
+    cookieNode.classList.add("ofc-cookie-container");
+    cookieNode.setAttribute("data-item", "js-cookie-container");
+
     settingsNode.classList.add("ofc-settings-container");
     settingsNode.setAttribute("data-item", "js-settings-container");
+
+    const cookieCrumb = `
+    <div class='ofc-crumb-container'>
+      <div class='ofc-crumb-image-wrapper'>
+      <img src="images/cookie_icon.svg">
+      </div>
+    </div>`;
 
     const banner = `
     <div class='ofc-message-container'>
@@ -113,7 +129,10 @@ class Banner {
             </label>
           </div>            
           <div class='ofc-accordion-body' style='display:none;'>
-              <p>Explainer about above cookies</p>
+              <p>These are essential cookies that are necessary for a website to function properly. 
+              They enable basic functions such as page navigation, access to secure areas, and ensuring that the website operates correctly. 
+              Strictly necessary cookies are typically set in response to user actions, such as logging in or filling out forms. 
+              They do not require user consent as they are crucial for the website's operation.</p>
           </div>
         </div>
         <div class='ofc-accordion'>
@@ -124,7 +143,12 @@ class Banner {
               <span class="ofc-toggle-slider"></span>
             </label>
           </div>       
-          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Performance cookies collect anonymous information about how visitors use a website. 
+            They are used to improve website performance and provide a better user experience. 
+            These cookies gather data about the pages visited, the time spent on the website, and any error messages encountered. 
+            The information collected is aggregated and anonymized, and it helps website owners understand and analyze website traffic patterns.</p>
+          </div>
         </div>
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
@@ -134,7 +158,13 @@ class Banner {
               <span class="ofc-toggle-slider"></span>
             </label>
           </div>       
-          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Marketing cookies are used to track users across websites and build a profile of their interests. 
+            These cookies are often set by advertising networks or third-party advertisers. 
+            They are used to deliver targeted advertisements and measure the effectiveness of marketing campaigns. 
+            Marketing cookies may collect data such as browsing habits, visited websites, and interaction with ads. 
+            Consent from the user is usually required for the use of marketing cookies.</p>
+          </div>
         </div>
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
@@ -144,7 +174,12 @@ class Banner {
               <span class="ofc-toggle-slider"></span>
             </label>
           </div>       
-          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Functional cookies enable enhanced functionality and customization on a website. 
+            They remember user preferences, such as language settings and personalized preferences, to provide a more personalized experience. 
+            These cookies may also be used to remember changes made by the user, such as font size or layout preferences. 
+            Functional cookies do not track or store personal information and are usually set in response to user actions.</p>
+          </div>
         </div>
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
@@ -154,7 +189,13 @@ class Banner {
               <span class="ofc-toggle-slider"></span>
             </label>
           </div>       
-          <div class='ofc-accordion-body' style='display:none;'><p>Explainer about above cookies</p></div>
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Analytic cookies are similar to performance cookies as they collect information about how users interact with a website. However, 
+            unlike performance cookies, analytic cookies provide more detailed and comprehensive data. 
+            They track and analyze user behavior, such as click patterns, mouse movements, and scroll depth, 
+            to gain insights into user engagement and website performance. 
+            Analytic cookies help website owners make data-driven decisions to optimize their websites.</p>
+          </div>
         </div>
     </div>
     <div>
@@ -164,8 +205,11 @@ class Banner {
     </div>`;
     containerNode.innerHTML = banner;
     settingsNode.innerHTML = settings;
+    cookieNode.innerHTML = cookieCrumb;
+
     document.body.appendChild(containerNode);
     document.body.appendChild(settingsNode);
+    document.body.appendChild(cookieNode);
   }
 
   showElement(element) {
@@ -237,6 +281,9 @@ class Banner {
       this.hideElement(this.bannerContainer);
       this.hideElement(this.settingsMenu);
     });
+    this.cookieCrumb.addEventListener("click", () => {
+      this.showElement(this.settingsMenu);
+    });
   }
 
   initializeAccordions() {
@@ -250,6 +297,17 @@ class Banner {
   }
 
   blockCookies() {
+    this.setCookie("_ga", "test", 7);
+    this.setCookie("_ga_", "test", 7);
+    this.setCookie("_gid", "test", 7);
+    this.setCookie("_gat", "test", 7);
+    this.setCookie("_dc_gtm_", "test", 7);
+    this.setCookie("demdex", "test", 7);
+    this.setCookie("dextp", "test", 7);
+    this.setCookie("dst", "test", 7);
+    this.setCookie("MSPAuth", "test", 7);
+    this.setCookie("PPAuth", "test", 7);
+    this.setCookie("MSNRPSAuth", "test", 7);
     this.pendingCookies = document.cookie.split(";");
     try {
       for (let i = 0; i < this.pendingCookies.length; i++) {
@@ -302,15 +360,23 @@ class Banner {
     this.setCookie("ofcPer", "yes", 7);
     this.hideElement(this.bannerContainer);
     this.hideElement(this.settingsMenu);
+    this.showElement(this.cookieCrumb);
   }
 
   handleRejection() {
-    for (let i = 0; i < this.pendingCookies.length; i++) {
-      let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
+    let list = [];
+    if (this.pendingCookies.length <= 0) {
+      list = document.cookie.split(";");
+    } else {
+      list = this.pendingCookies;
+    }
+    for (let i = 0; i < list.length; i++) {
+      let cookieName = list[i].split("=")[0].trim(); // get name of cookie
       this.setCookie(cookieName, "", -1);
     }
     this.setCookie("ofcPer", "no", 7);
     this.pendingCookies = [];
+    this.list = [];
     this.hideElement(this.bannerContainer);
     this.hideElement(this.settingsMenu);
   }
@@ -319,6 +385,8 @@ class Banner {
     let consent = this.getCookie("ofcPer");
     if (consent === "" || consent === "no") {
       this.showElement(this.bannerContainer);
+    } else {
+      this.showElement(this.cookieCrumb);
     }
     return consent;
   }
