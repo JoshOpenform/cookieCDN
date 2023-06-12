@@ -148,7 +148,7 @@ class Banner {
             <p>Performance cookies collect anonymous information about how visitors use a website. 
             They are used to improve website performance and provide a better user experience. 
             These cookies gather data about the pages visited, the time spent on the website, and any error messages encountered. 
-            The information collected is aggregated and anonymized, and it helps website owners understand and analyse website traffic patterns.</p>
+            The information collected is aggregated and anonymised, and it helps website owners understand and analyse website traffic patterns.</p>
           </div>
         </div>
         <div class='ofc-accordion'>
