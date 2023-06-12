@@ -193,7 +193,7 @@ class Banner {
           <div class='ofc-accordion-body' style='display:none;'>
             <p>Analytic cookies are similar to performance cookies as they collect information about how users interact with a website. However, 
             unlike performance cookies, analytic cookies provide more detailed and comprehensive data. 
-            They track and analyse user behavior, such as click patterns, mouse movements, and scroll depth, 
+            They track and analyse user behaviour, such as click patterns, mouse movements, and scroll depth, 
             to gain insights into user engagement and website performance. 
             Analytic cookies help website owners make data-driven decisions to optimize their websites.</p>
           </div>
