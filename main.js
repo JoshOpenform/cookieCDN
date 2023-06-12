@@ -97,7 +97,7 @@ class Banner {
 
     const banner = `
     <div class='ofc-message-container'>
-        <p>By clicking "Accept All Cookies", you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our marketing efforts.</p>
+        <p>By clicking "Accept All Cookies", you agree to the storing of cookies on your device to enhance site navigation, analyse site usage, and assist in our marketing efforts.</p>
     </div>
     <div class='ofc-button-container'>
         <button data-item='js-settings-button' type='button' class='ofc-button'>Cookie Settings</button>
@@ -113,7 +113,7 @@ class Banner {
   <div data-item='js-settings-content' class='ofc-settings-content'>
   <img src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/cookieJar.jpg" class="cookieJar-logo" />
     <div class='ofc-settings-content-header'>
-      <p>Privacy Preference Center</p>
+      <p>Privacy Preference Centre</p>
       <button class='ofc-close ofc-popclose' data-item='js-settings-close-button'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"> <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/> </svg></button>
     </div>
     <div>
@@ -148,7 +148,7 @@ class Banner {
             <p>Performance cookies collect anonymous information about how visitors use a website. 
             They are used to improve website performance and provide a better user experience. 
             These cookies gather data about the pages visited, the time spent on the website, and any error messages encountered. 
-            The information collected is aggregated and anonymized, and it helps website owners understand and analyze website traffic patterns.</p>
+            The information collected is aggregated and anonymized, and it helps website owners understand and analyse website traffic patterns.</p>
           </div>
         </div>
         <div class='ofc-accordion'>
@@ -176,8 +176,8 @@ class Banner {
             </label>
           </div>       
           <div class='ofc-accordion-body' style='display:none;'>
-            <p>Functional cookies enable enhanced functionality and customization on a website. 
-            They remember user preferences, such as language settings and personalized preferences, to provide a more personalized experience. 
+            <p>Functional cookies enable enhanced functionality and customisation on a website. 
+            They remember user preferences, such as language settings and personalised preferences, to provide a more personalised experience. 
             These cookies may also be used to remember changes made by the user, such as font size or layout preferences. 
             Functional cookies do not track or store personal information and are usually set in response to user actions.</p>
           </div>
@@ -193,7 +193,7 @@ class Banner {
           <div class='ofc-accordion-body' style='display:none;'>
             <p>Analytic cookies are similar to performance cookies as they collect information about how users interact with a website. However, 
             unlike performance cookies, analytic cookies provide more detailed and comprehensive data. 
-            They track and analyze user behavior, such as click patterns, mouse movements, and scroll depth, 
+            They track and analyse user behavior, such as click patterns, mouse movements, and scroll depth, 
             to gain insights into user engagement and website performance. 
             Analytic cookies help website owners make data-driven decisions to optimize their websites.</p>
           </div>
