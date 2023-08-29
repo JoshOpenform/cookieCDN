@@ -140,7 +140,7 @@ h1 {
   transition: 0.2s;
 }
 
-.ofc-button-container button {
+.cookie-button-container button {
   background: #fff;
   border-radius: 100px;
   border: 1px solid #000;
@@ -153,7 +153,7 @@ h1 {
   margin: 7px;
 }
 
-.ofc-button-container button:hover {
+.cookie-button-container button:hover {
   background: #000;
   border-radius: 100px;
   border: 1px solid #000;
