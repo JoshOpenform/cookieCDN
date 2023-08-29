@@ -1,4 +1,4 @@
-h1 {
+.ofc-banner-container h1, .ofc-settings-container h1, {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   text-align: center;
 }
@@ -231,7 +231,7 @@ h1 {
   height: 26px;
 }
 
-input[type="checkbox"] {
+.ofc-toggle-switch input[type="checkbox"] {
   display: none;
 }
 
@@ -248,11 +248,11 @@ input[type="checkbox"] {
   border: 1px solid #000;
 }
 
-input[type="checkbox"]:checked + .ofc-toggle-slider {
+.ofc-toggle-switch input[type="checkbox"]:checked + .ofc-toggle-slider {
   background-color: #000000;
 }
 
-input[type="checkbox"]:checked + .ofc-toggle-slider:before {
+.ofc-toggle-switch input[type="checkbox"]:checked + .ofc-toggle-slider:before {
   transform: translateX(24px);
 }
 
