@@ -302,15 +302,17 @@ class Banner {
     try {
       for (let i = 0; i < this.pendingCookies.length; i++) {
         let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
-        let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
-        if (cookieName === "ofcPer") {
-          cookieValue === "yes" ? this.handleConsent() : this.handleRejection();
-          break;
+        if(cookieName){
+          let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
+          if (cookieName === "ofcPer") {
+            cookieValue === "yes" ? this.handleConsent() : this.handleRejection();
+            break;
+          }
+          this.setCookie(cookieName, "", -1);
         }
-        this.setCookie(cookieName, "", -1);
-      }
-    } catch (e) {}
+      } catch (e) {}
   }
+}
 
   getCookie(cname) {
     let name = cname + "=";
