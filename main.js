@@ -345,8 +345,10 @@ class Banner {
   handleConsent() {
     for (let i = 0; i < this.pendingCookies.length; i++) {
       let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
-      let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
-      this.setCookie(cookieName, cookieValue, 7);
+      if(cookieName){
+        let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
+        this.setCookie(cookieName, cookieValue, 7);
+      }
     }
     this.pendingCookies = [];
     this.setCookie("ofcPer", "yes", 7);
