@@ -73,7 +73,8 @@ class Banner {
   }
 
   initialize() {
-    const containerNode = document.createElement("div");
+    setTimeout(()=>{
+      const containerNode = document.createElement("div");
     const settingsNode = document.createElement("div");
     const cookieNode = document.createElement("div");
 
@@ -211,6 +212,8 @@ class Banner {
     document.body.appendChild(containerNode);
     document.body.appendChild(settingsNode);
     document.body.appendChild(cookieNode);
+    },1000);
+    
   }
 
   showElement(element) {
