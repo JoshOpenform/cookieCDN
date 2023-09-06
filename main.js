@@ -309,7 +309,9 @@ class Banner {
             break;
           }
           this.setCookie(cookieName, "", -1);
-        }catch (e) {}
+        } catch (e) {
+        console.log("Issue saving current cookies");
+        }
       } 
   }
 }
