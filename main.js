@@ -299,7 +299,6 @@ class Banner {
 
   blockCookies() {
     this.pendingCookies = document.cookie.split(";");
-    try {
       for (let i = 0; i < this.pendingCookies.length; i++) {
         let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
         if(cookieName){
@@ -309,9 +308,6 @@ class Banner {
             break;
           }
           this.setCookie(cookieName, "", -1);
-        } catch (e) {
-        console.log("Issue saving current cookies, contact CookieJar developers");
-        }
       } 
   }
 }
