@@ -73,8 +73,7 @@ class Banner {
   }
 
   initialize() {
-    setTimeout(()=>{
-      const containerNode = document.createElement("div");
+    const containerNode = document.createElement("div");
     const settingsNode = document.createElement("div");
     const cookieNode = document.createElement("div");
 
@@ -212,7 +211,6 @@ class Banner {
     document.body.appendChild(containerNode);
     document.body.appendChild(settingsNode);
     document.body.appendChild(cookieNode);
-    },1000);
     
   }
 
@@ -305,7 +303,7 @@ class Banner {
       for (let i = 0; i < this.pendingCookies.length; i++) {
         let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
         if(cookieName){
-          let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
+          let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie update
           if (cookieName === "ofcPer") {
             cookieValue === "yes" ? this.handleConsent() : this.handleRejection();
             break;
