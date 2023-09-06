@@ -310,7 +310,7 @@ class Banner {
           }
           this.setCookie(cookieName, "", -1);
         } catch (e) {
-        console.log("Issue saving current cookies");
+        console.log("Issue saving current cookies, contact CookieJar developers");
         }
       } 
   }
@@ -348,7 +348,7 @@ class Banner {
     for (let i = 0; i < this.pendingCookies.length; i++) {
       let cookieName = this.pendingCookies[i].split("=")[0].trim(); // get name of cookie
       if(cookieName){
-        let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie
+        let cookieValue = this.pendingCookies[i].split("=")[1].trim(); // get value of cookie if there is a corrisponding name 
         this.setCookie(cookieName, cookieValue, 7);
       }
     }
