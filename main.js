@@ -31,10 +31,6 @@ class Banner {
     this.mC = false;
     this.aC = false;
 
-    this.initialize();
-    this.csvData = data;
-    this.blockCookies();
-    this.categorizeCookies(data);
     this.bannerContainer = document.querySelector(
       "[data-item='js-banner-container']"
     );
@@ -65,6 +61,12 @@ class Banner {
     this.cookieCrumb = document.querySelector(
       "[data-item='js-cookie-container']"
     );
+    
+    this.initialize();
+    this.csvData = data;
+    this.blockCookies();
+    this.categorizeCookies(data);
+    
     this.initializeAccordions();
     this.closeButton = document.querySelector("[data-item='js-close-button']");
     this.createEventListeners();
