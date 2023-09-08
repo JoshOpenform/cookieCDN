@@ -31,7 +31,8 @@ class Banner {
     this.mC = false;
     this.aC = false;
 
-    this.bannerContainer = document.querySelector(
+    this.initialize(()=>{
+          this.bannerContainer = document.querySelector(
       "[data-item='js-banner-container']"
     );
     this.settingsMenu = document.querySelector(
@@ -62,7 +63,6 @@ class Banner {
       "[data-item='js-cookie-container']"
     );
     
-    this.initialize();
     this.csvData = data;
     this.blockCookies();
     this.categorizeCookies(data);
@@ -72,6 +72,7 @@ class Banner {
     this.createEventListeners();
     this.hideElement(this.bannerContainer);
     this.checkCookie();
+    });
   }
 
   initialize() {
