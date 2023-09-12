@@ -73,7 +73,7 @@ class Banner {
     this.createEventListeners();
     this.hideElement(this.bannerContainer);
     this.checkCookie();
-    },1500);
+    },100);
     
   }
 
