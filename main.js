@@ -66,7 +66,7 @@ class Banner {
 
       this.csvData = data;
       this.setCookie("Test", "Hello", 7);
-      this.blockCookies();
+      //this.blockCookies();
       this.categorizeCookies(data);
       this.initializeAccordions();
       this.closeButton = document.querySelector(
@@ -75,6 +75,12 @@ class Banner {
       this.createEventListeners();
       this.hideElement(this.bannerContainer);
       this.checkCookie();
+      
+      const userConsented = this.checkCookie();
+      if (!userConsented) {
+        this.blockCookies();
+      }
+
     }, 100);
   }
 
