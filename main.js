@@ -65,7 +65,7 @@ class Banner {
       );
 
       this.csvData = data;
-      this.blockCookies();
+     // this.blockCookies();
       this.categorizeCookies(data);
       this.initializeAccordions();
       this.closeButton = document.querySelector(
@@ -74,6 +74,12 @@ class Banner {
       this.createEventListeners();
       this.hideElement(this.bannerContainer);
       this.checkCookie();
+
+      const userConsented = this.checkCookie();
+      if (!userConsented) {
+        this.blockCookies();
+      }
+      
     }, 100);
   }
 
@@ -390,7 +396,7 @@ class Banner {
     this.hideElement(this.settingsMenu);
   }
 
-  checkCookie() {
+  /*checkCookie() {
     let consent = this.getCookie("ofcPer");
     if (consent === "" || consent === "no") {
       this.showElement(this.bannerContainer);
@@ -398,8 +404,22 @@ class Banner {
       this.showElement(this.cookieCrumb);
     }
     return consent;
-  }
+  }*/
+  
+    checkCookie() {
+    let consent = this.getCookie("ofcPer");
 
+      if (consent === "yes") {
+        this.hideElement(this.bannerContainer);
+        this.showElement(this.cookieCrumb);
+        return true;
+      } else {
+        this.showElement(this.bannerContainer);
+        this.hideElement(this.cookieCrumb);
+        return false;
+      }
+  }
+  
   checkAll() {
     const checklist = document.querySelectorAll(".ofc-toggle-switch input");
     checklist.forEach((item) => {
