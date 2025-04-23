@@ -376,7 +376,7 @@ class Banner {
     this.hideElement(this.settingsMenu);
   }
 
-  checkCookie() {
+ /* checkCookie() {
     let consent = this.getCookie("ofcPer");
     if (consent === "" || consent === "no") {
       this.showElement(this.bannerContainer);
@@ -384,7 +384,21 @@ class Banner {
       this.showElement(this.cookieCrumb);
     }
     return consent;
+  }*/
+    checkCookie() {
+    let consent = this.getCookie("ofcPer");
+
+      if (consent === "yes") {
+        this.hideElement(this.bannerContainer);
+        this.showElement(this.cookieCrumb);
+        return true;
+      } else {
+        this.showElement(this.bannerContainer);
+        this.hideElement(this.cookieCrumb);
+        return false;
+      }
   }
+
 
   setPrefCookie(cookieName, agreed, list = false) {
     if (!list) {
