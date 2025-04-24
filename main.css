@@ -53,6 +53,11 @@
   font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
+.ofc-banner-container.visible ~ .ofc-cookie-container
+{
+  display:none;
+}
+
 .ofc-cookie-container {
   position: fixed;
   width: 40px;
@@ -60,7 +65,7 @@
   bottom: 20px;
   left: 20px;
   z-index: 100000000000;
-  display: none;
+  display: block;
   cursor: pointer;
   transition: bottom 500ms ease;
 }
