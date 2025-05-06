@@ -3,6 +3,10 @@
   text-align: center;
 }
 
+.settings-reject-all {
+  display: none !important;
+}
+
 .cookieJar-logo {
   position: relative;
   width: 160px;
