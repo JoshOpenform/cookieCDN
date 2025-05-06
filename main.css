@@ -6,6 +6,9 @@
 .settings-reject-all {
   display: none !important;
 }
+.ofc-settings-container.visible + .ofc-cookie-container {
+  display: none;
+}
 
 .cookieJar-logo {
   position: relative;
