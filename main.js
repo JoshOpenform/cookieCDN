@@ -138,7 +138,7 @@ class Banner {
           </div>
           <div class='cookie-button-container'>
               <button data-item='js-settings-button' type='button' class='cookie-button'>Cookie Settings</button>
-              <button data-item='js-reject-button' type='button' class='cookie-button'>Reject All</button> <!-- Banner Reject -->
+              <button data-item='js-reject-button' type='button' class='cookie-button'>Strictly Necessary</button> <!-- Banner Reject -->
               <button data-item='js-accept-button' data-all='1' type='button' class='cookie-button'>Accept All</button>
           </div>
           <div class='ofc-close-container'>
@@ -243,7 +243,7 @@ class Banner {
               </div>
           </div>
           <div>
-          <button class='ofc-popbutton settings-reject-all' data-item='js-reject-button'>Reject All</button> <!-- Settings Reject -->
+          <button class='ofc-popbutton settings-reject-all' data-item='js-reject-button'>Strictly Necessary</button> <!-- Settings Reject -->
           <button class='ofc-popbutton' data-item='js-confirm-button' data-all='0'>Confirm My Choices</button>
           </div>
           </div>`;
