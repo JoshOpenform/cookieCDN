@@ -121,7 +121,7 @@ class Banner {
         <button data-item='js-reject-button' type='button' class='cookie-button'>DECLINE</button>
     </div>
     <div class='ofc-close-container'>
-        <button class='cookie-button ofc-close' data-item='js-close-button'><img src="close_icon.svg" /></button>
+        <button class='cookie-button ofc-close' data-item='js-close-button'><img src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/close_icon.svg" /></button>
     </div>
     <div class='settings'>
         <button data-item='js-settings-button' type='button' class='cookie-button'>Settings</button>
@@ -136,7 +136,7 @@ class Banner {
     <div class="settings-content-container">
     <div class='ofc-settings-content-header'>
       <p>PRIVACY PREFERENCE CENTER</p>
-      <button class='ofc-close ofc-popclose' data-item='js-settings-close-button'><img src="close_icon.svg" /></button>
+      <button class='ofc-close ofc-popclose' data-item='js-settings-close-button'><img src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/close_icon.svg" /></button>
     </div>
     <div class="privacy-content-text">
         <p class="ofc-privacytext">Cookies are small text files that are placed on your computer by websites that you visit. Websites use cookies to help users navigate efficiently and perform certain functions. Cookies that are required for the website to operate properly are allowed to be set without your permission. All other cookies need to be approved before they can be set in the browser.</p> <br />
@@ -149,7 +149,7 @@ class Banner {
         <div class='ofc-accordion'>
           <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
               <p>Strictly necessary cookies</p>
-              <img class="lock-icon" src="lock-locked_icon.svg" />
+              <img class="lock-icon" src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/lock-locked_icon.svg" />
               <!-- Strictly necessary cookies are always active and not toggleable by user -->
           </div>            
           <div class='ofc-accordion-body' style='display:none;'>
