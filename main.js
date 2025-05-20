@@ -1,25 +1,42 @@
 class Banner {
-  // ... (Keep all properties as they are) ...
   bannerContainer;
   settingsMenu;
   settingsContent;
   settingsButton;
   settingsAccordions;
-  rejectButtons; // Note: This was querySelector before, might need querySelectorAll if multiple
+  rejectButtons;
   acceptButtons;
   settingsCloseButton;
   closeButton;
   pendingCookies;
   confirmButton;
   csvData;
+
   cookieCrumb;
-  categorizedCookies = {};
-  acceptedCategories = [];
+
+  // sNC, pC, etc. are not actively used for state, toggles are read directly from DOM
+  // sNC;
+  // pC;
+  // fC;
+  // mC;
+  // aC;
+
+  categorizedCookies; // This is the property for storing categorized cookie data
+  // acceptedCategories; // Not currently used
 
   constructor(data) {
+    // this.sNC = false; // These can be removed if not used
+    // this.pC = false;
+    // this.tC = false; // tC was not defined as a property
+    // this.fC = false;
+    // this.mC = false;
+    // this.aC = false;
+
+    this.pendingCookies = []; // Initialize pendingCookies
+    this.categorizedCookies = {}; // Initialize categorizedCookies
+
     this.initialize();
     setTimeout(() => {
-      // --- Query Selectors ---
       this.bannerContainer = document.querySelector(
         "[data-item='js-banner-container']"
       );
@@ -32,12 +49,7 @@ class Banner {
       this.settingsButton = document.querySelector(
         "[data-item='js-settings-button']"
       );
-      // **** CHANGE: Use querySelectorAll for rejectButtons for consistency ****
-      //      If you truly only have one, querySelector is fine, but querySelectorAll
-      //      works for one or more and requires iterating in createEventListeners.
-      //      Let's assume there *could* be more than one reject button like accept.
       this.rejectButtons = document.querySelectorAll(
-        // Changed to querySelectorAll
         "[data-item='js-reject-button']"
       );
       this.acceptButtons = document.querySelectorAll(
@@ -55,67 +67,34 @@ class Banner {
       this.cookieCrumb = document.querySelector(
         "[data-item='js-cookie-container']"
       );
-      this.closeButton = document.querySelector(
-        // Moved selector here for consistency
-        "[data-item='js-close-button']"
-      );
-      // --- End Query Selectors ---
 
       this.csvData = data;
-      this.pendingCookies = document.cookie.split(";");
-      this.categorizeCookies(data);
+      //this.setCookie("Test", "Hello", 7); // Example cookie, can be removed
+
+      this.categorizeCookies(data); // Categorize first
       this.initializeAccordions();
-      this.createEventListeners(); // Call after elements are selected
+      this.closeButton = document.querySelector(
+        "[data-item='js-close-button']"
+      );
+      this.createEventListeners();
+      // Initial state: banner is hidden by default in CSS or should be.
+      // this.hideElement(this.bannerContainer); // Let checkCookie handle visibility
 
-      // --- **** CHANGE: Revised initial state logic **** ---
-      const consentState = this.checkCookie(); // Gets "", "yes", or "no"
-
-      if (consentState === "yes") {
-        // User previously accepted
-        console.log("Consent state: yes - Hiding banner, showing crumb.");
-        this.hideElement(this.bannerContainer);
-        this.showElement(this.cookieCrumb);
-        // Optional: Ensure cookies match prefs if needed on load
-        // this.applyPreferences(); // You might need a function like this
-      } else if (consentState === "no") {
-        // User previously rejected
-        console.log("Consent state: no - Hiding banner and crumb.");
-        this.hideElement(this.bannerContainer);
-        this.hideElement(this.cookieCrumb);
-        // Ensure non-essential cookies are removed on load if user previously rejected
-        this.blockNonEssentialCookies();
-      } else {
-        // No decision recorded (consentState is "" or null/undefined)
-        console.log("Consent state: none - Showing banner.");
-        this.hideElement(this.cookieCrumb); // Ensure crumb is hidden
-        // Block non-essential cookies before showing the banner for the first time
-        this.blockNonEssentialCookies();
-        this.showElement(this.bannerContainer);
+      const userConsented = this.checkCookie(); // This will show/hide banner
+      if (!userConsented) {
+        this.blockCookies(); // Block cookies only if no prior consent or explicit rejection
       }
-      // --- **** END: Revised initial state logic **** ---
-    }, 100); // Consider reducing delay or using DOMContentLoaded listener before initialization
+      this.syncTogglesToPreferences(); // Sync toggles if settings are open or become visible
+    }, 100);
   }
 
-  // ... (initialize method remains the same) ...
   initialize() {
     const containerNode = document.createElement("div");
     const settingsNode = document.createElement("div");
     const cookieNode = document.createElement("div");
 
-    // --- Read existing preference cookies to set initial toggle states ---
-    // Strictly is always true/checked/disabled
-    const isPerformance =
-      this.getCookie("Performance") === "true" ? "checked" : "";
-    const isMarketing = this.getCookie("Marketing") === "true" ? "checked" : "";
-    const isFunctional =
-      this.getCookie("Functional") === "true" ? "checked" : "";
-    const isAnalytical =
-      this.getCookie("Analytics") === "true" ? "checked" : "";
-    // ---------------------------------------------------------------------
-
     containerNode.classList.add("ofc-banner-container");
-    // Don't add 'visible' here, control visibility in constructor logic
-    // containerNode.classList.add("visible");
+    // containerNode.classList.add("visible"); // Start hidden, let checkCookie manage
     containerNode.setAttribute("data-item", "js-banner-container");
     containerNode.style.width = "calc(100% - 17px)";
 
@@ -126,137 +105,156 @@ class Banner {
     settingsNode.setAttribute("data-item", "js-settings-container");
 
     const cookieCrumb = `
-          <div class='ofc-crumb-container'>
-            <div class='ofc-crumb-image-wrapper'>
-            <img src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/cookie_icon.svg" alt="Cookie Settings">
-            </div>
-          </div>`;
+    <div class='ofc-crumb-container'>
+      <div class='ofc-crumb-image-wrapper'>
+      <img src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/cookie_icon.svg">
+      </div>
+    </div>`;
 
     const banner = `
-          <div class='ofc-message-container'>
-              <p>By clicking "Accept All Cookies", you agree to the storing of cookies on your device to enhance site navigation, analyse site usage, and assist in our marketing efforts.</p>
-          </div>
-          <div class='cookie-button-container'>
-              <button data-item='js-settings-button' type='button' class='cookie-button'>Cookie Settings</button>
-              <button data-item='js-reject-button' type='button' class='cookie-button'>Strictly Necessary</button> <!-- Banner Reject -->
-              <button data-item='js-accept-button' data-all='1' type='button' class='cookie-button'>Accept All</button>
-          </div>
-          <div class='ofc-close-container'>
-              <button class='cookie-button ofc-close' data-item='js-close-button' aria-label="Close Banner"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"> <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/> </svg></button>
-          </div>
-          `;
+    <div class='ofc-message-container'>
+        <h3>This website uses cookies</h3>
+        <p>This website uses cookies to improve user experience. By using our website you consent to all cookies in accordance with our Cookie Policy.</p>
+    </div>
+    <div class='cookie-button-container'>
+        <button data-item='js-accept-button' type='button' class='cookie-button'>ACCEPT</button>
+        <button data-item='js-reject-button' type='button' class='cookie-button'>DECLINE</button>
+    </div>
+    <div class='ofc-close-container'>
+        <button class='cookie-button ofc-close' data-item='js-close-button'><img src="close_icon.svg" /></button>
+    </div>
+    <div class='settings'>
+        <button data-item='js-settings-button' type='button' class='cookie-button'>Settings</button>
+        <p>Powered by <span class='cookie-jar-link'>CookieJar</span></p>
+    </div>
+    `;
 
     const settings = `
-        <div data-item='js-settings-content' class='ofc-settings-content'>
-        <img src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/cookieJar.jpg" class="cookieJar-logo" alt="Cookie Jar Logo"/>
-          <div class='ofc-settings-content-header'>
-            <p>Privacy Preference Centre</p>
-            <button class='ofc-close ofc-popclose' data-item='js-settings-close-button' aria-label="Close Settings"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"> <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/> </svg></button>
+  <div data-item='js-settings-content' class='ofc-settings-content'>
+    <h2>This website uses cookies</h2>
+  <!-- <img src="https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/images/cookieJar.jpg" class="cookieJar-logo" /> -->
+    <div class="settings-content-container">
+    <div class='ofc-settings-content-header'>
+      <p>PRIVACY PREFERENCE CENTER</p>
+      <button class='ofc-close ofc-popclose' data-item='js-settings-close-button'><img src="close_icon.svg" /></button>
+    </div>
+    <div class="privacy-content-text">
+        <p class="ofc-privacytext">Cookies are small text files that are placed on your computer by websites that you visit. Websites use cookies to help users navigate efficiently and perform certain functions. Cookies that are required for the website to operate properly are allowed to be set without your permission. All other cookies need to be approved before they can be set in the browser.</p> <br />
+        <p>You can change your consent to cookie usage at any time on our Privacy Policy page.<br />
+        We also use cookies to collect data for the purpose of personalizing and measuring the effectiveness of our advertising. <br />
+        For more details, visit the <a href="https://policies.google.com/privacy" target=_blank>Google Privacy Policy</a>.</p>
+        
+    </div>
+    <div class='ofc-settings'>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Strictly necessary cookies</p>
+              <img class="lock-icon" src="lock-locked_icon.svg" />
+              <!-- Strictly necessary cookies are always active and not toggleable by user -->
+          </div>            
+          <div class='ofc-accordion-body' style='display:none;'>
+              <p>These are essential cookies that are necessary for a website to function properly. 
+              They enable basic functions such as page navigation, access to secure areas, and ensuring that the website operates correctly. 
+              Strictly necessary cookies are typically set in response to user actions, such as logging in or filling out forms. 
+              They do not require user consent as they are crucial for the website's operation.</p>
           </div>
-          <div>
-              <p class="ofc-privacytext">When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device and is mostly used to make the site work as you expect it to. The information does not usually directly identify you, but it can give you a more personalised web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. Click on the different category headings to find out more and change our default settings. However, blocking some types of cookies may impact your experience of the site and the services we are able to offer.</p>
-              <button class='ofc-popbutton' data-item='js-accept-button' data-all='3'>Allow All</button>
+        </div>
+        <hr>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Performance cookies</p>
+              <label class="ofc-toggle-switch" data-item="js-toggle-pC">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Performance cookies collect anonymous information about how visitors use a website. 
+            They are used to improve website performance and provide a better user experience. 
+            These cookies gather data about the pages visited, the time spent on the website, and any error messages encountered. 
+            The information collected is aggregated and anonymised, and it helps website owners understand and analyse website traffic patterns.</p>
           </div>
-          <div class='ofc-settings'>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Strictly Necessary Cookies</p>
-                    <label class="ofc-toggle-switch ofc-toggle-disabled" data-item="js-toggle-sNC">
-                     <!-- **** CHANGE: Added checked and disabled **** -->
-                    <input type="checkbox" checked disabled>
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>
-                <div class='ofc-accordion-body' style='display:none;'>
-                    <p>These are essential cookies that are necessary for a website to function properly.
-                    They enable basic functions such as page navigation, access to secure areas, and ensuring that the website operates correctly.
-                    Strictly necessary cookies are typically set in response to user actions, such as logging in or filling out forms.
-                    They do not require user consent as they are crucial for the website's operation.</p>
-                    <p><strong>These cookies are always active.</strong></p> <!-- Optional: Add text indication -->
-                </div>
-              </div>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Performance Cookies</p>
-                    <label class="ofc-toggle-switch" data-item="js-toggle-pC">
-                     <!-- Use state from preference cookies -->
-                    <input type="checkbox" ${isPerformance}>
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>
-                <div class='ofc-accordion-body' style='display:none;'>
-                  <p>Performance cookies collect anonymous information about how visitors use a website.
-                  They are used to improve website performance and provide a better user experience.
-                  These cookies gather data about the pages visited, the time spent on the website, and any error messages encountered.
-                  The information collected is aggregated and anonymised, and it helps website owners understand and analyse website traffic patterns.</p>
-                </div>
-              </div>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Marketing Cookies</p>
-                    <label class="ofc-toggle-switch" data-item="js-toggle-mC">
-                     <!-- Use state from preference cookies -->
-                    <input type="checkbox" ${isMarketing}>
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>
-                <div class='ofc-accordion-body' style='display:none;'>
-                  <p>Marketing cookies are used to track users across websites and build a profile of their interests.
-                  These cookies are often set by advertising networks or third-party advertisers.
-                  They are used to deliver targeted advertisements and measure the effectiveness of marketing campaigns.
-                  Marketing cookies may collect data such as browsing habits, visited websites, and interaction with ads.
-                  Consent from the user is usually required for the use of marketing cookies.</p>
-                </div>
-              </div>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Functional Cookies</p>
-                    <label class="ofc-toggle-switch" data-item="js-toggle-fC">
-                     <!-- Use state from preference cookies -->
-                    <input type="checkbox" ${isFunctional}>
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>
-                <div class='ofc-accordion-body' style='display:none;'>
-                  <p>Functional cookies enable enhanced functionality and customisation on a website.
-                  They remember user preferences, such as language settings and personalised preferences, to provide a more personalised experience.
-                  These cookies may also be used to remember changes made by the user, such as font size or layout preferences.
-                  Functional cookies do not track or store personal information and are usually set in response to user actions.</p>
-                </div>
-              </div>
-              <div class='ofc-accordion'>
-                <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
-                    <p>Analytic Cookies</p>
-                    <label class="ofc-toggle-switch" data-item="js-toggle-aC">
-                     <!-- Use state from preference cookies -->
-                    <input type="checkbox" ${isAnalytical}>
-                    <span class="ofc-toggle-slider"></span>
-                  </label>
-                </div>
-                <div class='ofc-accordion-body' style='display:none;'>
-                  <p>Analytic cookies are similar to performance cookies as they collect information about how users interact with a website. However,
-                  unlike performance cookies, analytic cookies provide more detailed and comprehensive data.
-                  They track and analyse user behaviour, such as click patterns, mouse movements, and scroll depth,
-                  to gain insights into user engagement and website performance.
-                  Analytic cookies help website owners make data-driven decisions to optimize their websites.</p>
-                </div>
-              </div>
+        </div>
+        <hr>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Marketing cookies</p>
+              <label class="ofc-toggle-switch" data-item="js-toggle-mC">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Marketing cookies are used to track users across websites and build a profile of their interests. 
+            These cookies are often set by advertising networks or third-party advertisers. 
+            They are used to deliver targeted advertisements and measure the effectiveness of marketing campaigns. 
+            Marketing cookies may collect data such as browsing habits, visited websites, and interaction with ads. 
+            Consent from the user is usually required for the use of marketing cookies.</p>
           </div>
-          <div>
-          <button class='ofc-popbutton settings-reject-all' data-item='js-reject-button'>Strictly Necessary</button> <!-- Settings Reject -->
-          <button class='ofc-popbutton' data-item='js-confirm-button' data-all='0'>Confirm My Choices</button>
+        </div>
+        <hr>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Functional cookies</p>
+              <label class="ofc-toggle-switch" data-item="js-toggle-fC">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Functional cookies enable enhanced functionality and customisation on a website. 
+            They remember user preferences, such as language settings and personalised preferences, to provide a more personalised experience. 
+            These cookies may also be used to remember changes made by the user, such as font size or layout preferences. 
+            Functional cookies do not track or store personal information and are usually set in response to user actions.</p>
           </div>
-          </div>`;
+        </div>
+        <hr>
+        <div class='ofc-accordion'>
+          <div class="ofc-accordion-head" data-item="js-settings-accordion-head">
+              <p>Analytic cookies</p>
+              <label class="ofc-toggle-switch" data-item="js-toggle-aC">
+              <input type="checkbox">
+              <span class="ofc-toggle-slider"></span>
+            </label>
+          </div>       
+          <div class='ofc-accordion-body' style='display:none;'>
+            <p>Analytic cookies are similar to performance cookies as they collect information about how users interact with a website. However, 
+            unlike performance cookies, analytic cookies provide more detailed and comprehensive data. 
+            They track and analyse user behaviour, such as click patterns, mouse movements, and scroll depth, 
+            to gain insights into user engagement and website performance. 
+            Analytic cookies help website owners make data-driven decisions to optimize their websites.</p>
+          </div>
+        </div>
+        <hr>
+    </div>
+    </div>
+    <div class="button-container">
+      <div class="left-buttons">
+        <button class='ofc-popbutton' data-item='js-accept-button'>ACCEPT</button>
+        <button class='ofc-popbutton' data-item='js-reject-button'>DECLINE</button>
+      </div>
+      <button class='ofc-popbutton' data-item='js-confirm-button'>SAVE & CLOSE</button>
+      <p class="powered-by">Powered by <span class='cookie-jar-link'>CookieJar</span></p>
+    </div>
+    <!-- <div class="powered-by">
+      <p>Powered by <span class='cookie-jar-link'>CookieJar</span></p>
+    </div> -->
+    </div>`;
     containerNode.innerHTML = banner;
     settingsNode.innerHTML = settings;
     cookieNode.innerHTML = cookieCrumb;
+
+    const fontLink = document.createElement("link");
+    fontLink.rel = "stylesheet";
+    fontLink.href =
+      "https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap";
+    document.head.appendChild(fontLink);
 
     document.body.appendChild(containerNode);
     document.body.appendChild(settingsNode);
     document.body.appendChild(cookieNode);
   }
 
-  // ... (showElement, hideElement, categorizeCookies methods remain the same) ...
   showElement(element) {
     if (element) element.classList.add("visible");
   }
@@ -266,46 +264,41 @@ class Banner {
   }
 
   categorizeCookies(data) {
-    let categorized = {};
-    const currentCookies = document.cookie.split(";"); // Use current cookies for categorization
+    let localCategorizedCookies = {}; // Use a local variable to avoid confusion
+    try {
+      if (this.pendingCookies && this.pendingCookies.length > 0) {
+        // Ensure pendingCookies exists
+        this.pendingCookies.forEach((cookie) => {
+          let cookieName = cookie.split("=")[0].trim();
+          let cookieEntry = data && data[cookieName]; // Check if data itself is defined
 
-    currentCookies.forEach((cookie) => {
-      const cookieParts = cookie.split("=");
-      const cookieName = cookieParts[0] ? cookieParts[0].trim() : null;
-
-      if (!cookieName) return; // Skip if cookie name is empty
-
-      const cookieEntry = data ? data[cookieName] : null; // Handle case where data might be null/undefined
-      let category = "Other"; // Default category
-
-      if (cookieEntry && cookieEntry["Category"]) {
-        // Ensure category name doesn't have leading/trailing spaces
-        const rawCategory = cookieEntry["Category"].trim();
-        // Handle potential variations if needed, e.g., map "Strictly Necessary" to "Strictly"
-        if (rawCategory === "Strictly Necessary") {
-          category = "Strictly";
-        } else {
-          category = rawCategory;
-        }
+          if (cookieEntry) {
+            let category = cookieEntry["Category"];
+            if (!localCategorizedCookies[category]) {
+              localCategorizedCookies[category] = [];
+            }
+            localCategorizedCookies[category].push(cookie);
+          } else if (cookieName) {
+            // Only add if cookieName is valid
+            if (!localCategorizedCookies["Other"]) {
+              localCategorizedCookies["Other"] = [];
+            }
+            localCategorizedCookies["Other"].push(cookie);
+          }
+        });
       }
-
-      // Ensure category exists in the object
-      if (!categorized[category]) {
-        categorized[category] = [];
-      }
-
-      // Store the full cookie string (name=value)
-      categorized[category].push(cookie.trim());
-    });
-    this.categorizedCookies = categorized; // Update the instance property
-    // console.log("Categorized Cookies:", this.categorizedCookies); // For debugging
+      this.categorizedCookies = localCategorizedCookies; // Assign to the class property
+      // console.log("Categorized Cookies:", this.categorizedCookies);
+    } catch (e) {
+      console.error("Error categorizing cookies:", e);
+    }
   }
 
   createEventListeners() {
     if (this.settingsButton) {
       this.settingsButton.addEventListener("click", () => {
+        this.syncTogglesToPreferences(); // Sync toggles when settings are opened
         this.showElement(this.settingsMenu);
-        this.updateToggleStatesFromPrefs(); // Ensure toggles reflect saved state when opening
       });
     }
     if (this.settingsCloseButton) {
@@ -314,109 +307,81 @@ class Banner {
       });
     }
     if (this.closeButton) {
-      // Simple close implies rejection for this session only, no persistent cookie set
       this.closeButton.addEventListener("click", () => {
+        // This is like a soft decline for the session, doesn't set strong preferences
         this.hideElement(this.bannerContainer);
-        // Maybe set a session cookie here if needed? For now, just hides.
       });
     }
 
-    if (this.acceptButtons) {
-      this.acceptButtons.forEach((button) => {
-        button.addEventListener("click", (e) => {
-          const dataIndex = e.target.getAttribute("data-all");
-          this.handleConsent(dataIndex); // dataIndex 1 = banner accept, 3 = settings allow all
-        });
+    this.acceptButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        this.handleConsent();
       });
-    }
+    });
 
-    // **** CHANGE: Iterate over rejectButtons NodeList ****
-    if (this.rejectButtons) {
-      this.rejectButtons.forEach((button) => {
-        // Add iteration
-        button.addEventListener("click", () => {
-          this.handleRejection();
-        });
+    this.rejectButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        this.handleRejection();
       });
-    }
+    });
 
     if (this.confirmButton) {
       this.confirmButton.addEventListener("click", () => {
-        this.updatePreference(); // This handles saving custom choices
-        this.hideElement(this.settingsMenu);
-        this.showElement(this.cookieCrumb); // Show crumb after confirming
+        this.updatePreference(); // This already handles saving and closing
       });
     }
-
     if (this.cookieCrumb) {
       this.cookieCrumb.addEventListener("click", () => {
+        this.syncTogglesToPreferences(); // Sync toggles when settings are opened
         this.showElement(this.settingsMenu);
-        this.updateToggleStatesFromPrefs(); // Ensure toggles reflect saved state when opening
       });
     }
   }
 
-  // ... (initializeAccordions, blockNonEssentialCookies, getCookie, setCookie methods remain the same) ...
   initializeAccordions() {
-    if (!this.settingsAccordions) return;
     this.settingsAccordions.forEach(function (head) {
-      // Check if the event listener is already attached (simple check)
-      if (head.dataset.accordionInitialized) return;
-
       head.addEventListener("click", function () {
         let accordionBody = head.nextElementSibling;
-        if (
-          accordionBody &&
-          accordionBody.classList.contains("ofc-accordion-body")
-        ) {
+        if (accordionBody) {
+          // Check if accordionBody exists
+          head.classList.toggle("active");
           accordionBody.style.display =
             accordionBody.style.display === "none" ? "block" : "none";
         }
       });
-      head.dataset.accordionInitialized = "true"; // Mark as initialized
     });
   }
 
-  // Renamed from blockCookies to be more specific
-  blockNonEssentialCookies() {
-    const currentCookies = document.cookie.split(";");
-    // Ensure categorization is done based on current cookies BEFORE blocking
-    // It's important categorizeCookies maps "Strictly Necessary" etc. correctly to "Strictly"
-    this.categorizeCookies(this.csvData);
-
-    for (let i = 0; i < currentCookies.length; i++) {
-      const cookie = currentCookies[i];
-      const cookieName = cookie.split("=")[0]
-        ? cookie.split("=")[0].trim()
-        : null;
-
-      if (!cookieName) continue; // Skip if no name
-
-      // Check if the cookie is 'Strictly' necessary based on categorization
-      // Ensure the key "Strictly" matches how categorizeCookies stores it
-      const isStrictly = this.categorizedCookies["Strictly"]?.some(
-        (strictCookie) => strictCookie.startsWith(cookieName + "=")
-      );
-
-      // Also preserve the consent cookie itself and preference cookies
-      const isConsentCookie = cookieName === "ofcPer";
-      const isPrefCookie = [
-        "Strictly",
-        "Performance",
-        "Analytics",
-        "Marketing",
-        "Functional",
-      ].includes(cookieName);
-
-      if (!isStrictly && !isConsentCookie && !isPrefCookie) {
-        // console.log(`Blocking non-essential cookie: ${cookieName}`);
-        this.setCookie(cookieName, "", -1); // Delete cookie
-      }
-    }
-    // Re-read pending cookies after blocking
+  blockCookies() {
     this.pendingCookies = document.cookie
       .split(";")
-      .filter((c) => c.trim() !== "");
+      .filter((c) => c.trim() !== ""); // Filter empty strings
+    for (let i = 0; i < this.pendingCookies.length; i++) {
+      let cookieName = this.pendingCookies[i].split("=")[0].trim();
+      if (cookieName) {
+        // Preserve our own management cookies and essential preferences
+        const preservedCookies = [
+          "ofcPer",
+          "Strictly",
+          "Performance",
+          "Analytics",
+          "Marketing",
+          "Functional",
+        ];
+        if (cookieName === "ofcPer") {
+          // This logic is tricky here. blockCookies is called if consent isn't 'yes'.
+          // If ofcPer is 'no', we want to respect that.
+          // If ofcPer is '', we block.
+          // This specific check for 'ofcPer' and calling handleConsent/Rejection here might be redundant
+          // as checkCookie() should establish the state first.
+        } else if (!preservedCookies.includes(cookieName)) {
+          // Only expire cookies that are not our preference cookies
+          this.setCookie(cookieName, "", -1); // Expire
+        }
+      }
+    }
+    // After blocking, re-categorize what might remain or what was intended
+    this.categorizeCookies(this.csvData);
   }
 
   getCookie(cname) {
@@ -432,7 +397,7 @@ class Banner {
         return c.substring(name.length, c.length);
       }
     }
-    return ""; // Return empty string if not found
+    return "";
   }
 
   setCookie(name, value, days) {
@@ -442,418 +407,311 @@ class Banner {
       date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
       expires = "; expires=" + date.toUTCString();
     }
-    // Ensure SameSite attribute is set for security and browser compatibility
-    // Use 'Lax' as a reasonable default. 'Strict' can break navigation. 'None' requires Secure.
-    // Check if connection is secure before setting SameSite=None
-    let sameSite = "; SameSite=Lax";
-    // Simple check for localhost for testing purposes
-    const isLocalhost =
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1";
-
-    if (window.location.protocol === "https:" || isLocalhost) {
-      // Allow Secure on HTTPS or localhost
-      if (days > 0) {
-        // Only set Secure attribute on HTTPS/localhost and for non-deletion
-        // If you need cross-site cookies (e.g., embedded content), use None+Secure.
-        // For most standard website cookies, Lax is safer.
-        // expires += "; Secure"; // Uncomment if Secure is strictly needed for Lax/Strict too
-        // sameSite = "; SameSite=None; Secure"; // Use None only if Secure is possible AND required
-      }
-    }
-
-    // Set the cookie with path, expires, and SameSite
     document.cookie =
-      name + "=" + (value || "") + expires + "; path=/" + sameSite;
-    // console.log(`Setting cookie: ${name}=${value}; expires=${expires}; path=/; ${sameSite}`); // Debugging
+      name + "=" + (value || "") + expires + "; path=/; SameSite=Lax"; // Added SameSite
   }
 
-  // ... (handleConsent method remains the same) ...
-  handleConsent(dataIndex = 0) {
-    // Consent implies 'yes'
-    this.setCookie("ofcPer", "yes", 365); // Store consent for a year
+  // Helper to get toggle input elements
+  getToggleInputs() {
+    return {
+      sNC: null, // Strictly Necessary - not user-toggleable
+      pC: document.querySelector("[data-item='js-toggle-pC'] input"),
+      aC: document.querySelector("[data-item='js-toggle-aC'] input"),
+      mC: document.querySelector("[data-item='js-toggle-mC'] input"),
+      fC: document.querySelector("[data-item='js-toggle-fC'] input"),
+    };
+  }
 
-    // Set individual preference cookies based on action
-    // dataIndex 1 (banner accept) or 3 (settings allow all) means accept all
-    const acceptAll = dataIndex === "1" || dataIndex === "3";
-    this.setPrefCookie("all", acceptAll, true); // Use list=true to set all prefs
+  // Helper to update toggle UI elements
+  updateAllTogglesState(isAccepted) {
+    const toggles = this.getToggleInputs();
+    if (toggles.pC) toggles.pC.checked = isAccepted;
+    if (toggles.aC) toggles.aC.checked = isAccepted;
+    if (toggles.mC) toggles.mC.checked = isAccepted;
+    if (toggles.fC) toggles.fC.checked = isAccepted;
+  }
 
-    // Restore ALL cookies that were potentially blocked before consent
-    // This simplistic approach assumes 'pendingCookies' held the initially blocked ones.
-    // A more robust way might involve re-categorizing and setting based on accepted categories.
-    // For now, let's assume 'accept all' means restoring everything found initially.
-    if (acceptAll) {
-      // Re-categorize based on original data to potentially find all cookies
-      this.categorizeCookies(this.csvData); // Ensure full categorization list is available
-      for (const category in this.categorizedCookies) {
-        // Skip re-setting the preference cookies themselves here
-        if (
-          [
-            "Strictly",
-            "Performance",
-            "Analytics",
-            "Marketing",
-            "Functional",
-          ].includes(category)
-        ) {
-          // Check if the category corresponds to a preference cookie name, maybe skip?
-          // This depends on whether your categorizeCookies includes the pref cookies themselves
-        }
+  // Syncs toggles based on currently stored preference cookies
+  syncTogglesToPreferences() {
+    const toggles = this.getToggleInputs();
+    // Strictly necessary is always "true" conceptually, no user toggle
+    // this.setPrefCookie("Strictly", true, 7); // Already set by consent/rejection/update
 
-        if (this.categorizedCookies.hasOwnProperty(category)) {
-          this.categorizedCookies[category].forEach((cookieString) => {
-            // Simple re-setting. Might need refinement based on actual cookie structure.
-            const [name, value] = cookieString.split(/=(.*)/); // Split only on first '='
-            // Avoid re-setting the main consent cookie or pref cookies here if they were in the list
-            if (
-              name &&
-              name !== "ofcPer" &&
-              ![
-                "Strictly",
-                "Performance",
-                "Analytics",
-                "Marketing",
-                "Functional",
-              ].includes(name)
-            ) {
-              this.setCookie(name, value || "", 365); // Set accepted cookies for a year
-            }
-          });
+    if (toggles.pC)
+      toggles.pC.checked = this.getCookie("Performance") === "true";
+    if (toggles.aC) toggles.aC.checked = this.getCookie("Analytics") === "true";
+    if (toggles.mC) toggles.mC.checked = this.getCookie("Marketing") === "true";
+    if (toggles.fC)
+      toggles.fC.checked = this.getCookie("Functional") === "true";
+  }
+
+  handleConsent() {
+    this.setCookie("ofcPer", "yes", 7);
+
+    // Set all preference cookies to true
+    // The `setPrefCookie("all", true, 7, true)` type of call was confusing.
+    // Let's be explicit.
+    this.setPrefCookie("Strictly", true, 7); // Always true
+    this.setPrefCookie("Performance", true, 7);
+    this.setPrefCookie("Analytics", true, 7);
+    this.setPrefCookie("Marketing", true, 7);
+    this.setPrefCookie("Functional", true, 7);
+
+    this.updateAllTogglesState(true); // Update UI toggles to checked
+
+    // Re-apply cookies that were pending or based on full consent
+    // This should ideally re-evaluate all scripts/cookies that might have been blocked.
+    // For now, we re-set pending cookies. More robust would be to re-run categorize and apply logic.
+    if (this.pendingCookies && this.pendingCookies.length > 0) {
+      for (let i = 0; i < this.pendingCookies.length; i++) {
+        const parts = this.pendingCookies[i].split("=");
+        const cookieName = parts[0] ? parts[0].trim() : null;
+        const cookieValue = parts[1] ? parts[1].trim() : "";
+        if (cookieName) {
+          this.setCookie(cookieName, cookieValue, 7); // Set with 7-day expiry
         }
       }
     }
-    // If NOT acceptAll (which shouldn't happen via this specific handler, but for completeness):
-    // Only Strictly Necessary would have been kept by blockNonEssentialCookies,
-    // and setPrefCookie would have only set Strictly=true.
-
-    if (dataIndex === "3") {
-      // If "Allow All" was clicked within settings
-      this.checkAllToggles(); // Visually check all toggles
-    }
+    // this.pendingCookies = []; // Clear pending list as they are now processed
 
     this.hideElement(this.bannerContainer);
     this.hideElement(this.settingsMenu);
     this.showElement(this.cookieCrumb);
   }
 
-  // ... (handleRejection method remains the same - it already sets ofcPer=no) ...
   handleRejection() {
-    // Block non-essential cookies first
-    this.blockNonEssentialCookies();
+    this.setCookie("ofcPer", "no", 7);
 
-    // Set the main consent cookie to 'no'
-    this.setCookie("ofcPer", "no", 365); // Remember rejection for a year
+    // Set non-essential preference cookies to false
+    this.setPrefCookie("Strictly", true, 7); // Strictly necessary is always consented
+    this.setPrefCookie("Performance", false, 7);
+    this.setPrefCookie("Analytics", false, 7);
+    this.setPrefCookie("Marketing", false, 7);
+    this.setPrefCookie("Functional", false, 7);
 
-    // **** CHANGE: Set preference cookies: Strictly=true, others=false ****
-    this.setPrefCookie("all", false, true); // Use list=true, agreed=false
+    this.updateAllTogglesState(false); // Update UI toggles to unchecked
 
-    // Update visual toggles to reflect rejection (Strictly remains checked/disabled)
-    this.updateToggleStatesFromPrefs();
+    // Clear all non-essential cookies
+    const currentCookies = document.cookie
+      .split(";")
+      .filter((c) => c.trim() !== "");
+    const preservedCookieNames = [
+      "ofcPer",
+      "Strictly",
+      "Performance",
+      "Analytics",
+      "Marketing",
+      "Functional",
+    ];
 
-    // Hide banner and settings, ensure crumb is hidden
+    for (const cookieStr of currentCookies) {
+      const cookieName = cookieStr.split("=")[0].trim();
+      if (cookieName && !preservedCookieNames.includes(cookieName)) {
+        // A more sophisticated check would involve checking against this.categorizedCookies["Strictly necessary cookies"]
+        // For now, we preserve our own management/preference cookies and expire others.
+        this.setCookie(cookieName, "", -1); // Expire the cookie
+      }
+    }
+    this.pendingCookies = []; // Clear pending list
+
     this.hideElement(this.bannerContainer);
     this.hideElement(this.settingsMenu);
-    this.hideElement(this.cookieCrumb); // Don't show crumb on rejection
+    this.hideElement(this.cookieCrumb); // Ensure crumb is hidden on rejection
   }
 
-  // **** CHANGE: checkCookie now returns the actual value ****
   checkCookie() {
-    let consent = this.getCookie("ofcPer"); // Returns "", "yes", or "no"
-    // console.log("checkCookie found ofcPer:", consent); // Debugging
-    return consent; // Return the actual value or ""
-  }
-
-  // ... (checkAllToggles, setPrefCookie, updatePreference, blockNonEssentialCookiesBasedOnPrefs, updateToggleStatesFromPrefs methods remain the same) ...
-  checkAllToggles() {
-    const checklist = document.querySelectorAll(
-      ".ofc-toggle-switch input[type='checkbox']"
-    );
-    checklist.forEach((item) => {
-      if (!item.disabled) {
-        // Only check non-disabled toggles
-        item.checked = true;
-      }
-    });
-  }
-
-  setPrefCookie(cookieName, agreed, list = false) {
-    const agreedStr = String(agreed); // Convert boolean to 'true'/'false' string
-
-    if (!list) {
-      // Setting a single preference cookie (used by updatePreference)
-      if (cookieName === "Strictly") {
-        this.setCookie("Strictly", "true", 365); // Always true, store for a year
-      } else {
-        this.setCookie(cookieName, agreedStr, 365); // Set based on 'agreed', store for a year
-      }
-      return;
+    let consent = this.getCookie("ofcPer");
+    if (consent === "yes") {
+      this.hideElement(this.bannerContainer);
+      this.showElement(this.cookieCrumb);
+      // Sync toggles in case settings are opened later
+      this.syncTogglesToPreferences();
+      return true;
+    } else if (consent === "no") {
+      this.hideElement(this.bannerContainer);
+      this.hideElement(this.cookieCrumb);
+      // Sync toggles to show rejected state if settings are opened
+      this.syncTogglesToPreferences();
+      return false; // User has explicitly rejected
+    } else {
+      // consent is "" (not set)
+      this.showElement(this.bannerContainer);
+      this.hideElement(this.cookieCrumb);
+      // Set toggles to a default state (e.g., all off, or based on initial HTML)
+      // For now, let HTML defaults prevail until first interaction or sync
+      return false; // No consent decision made yet
     }
+  }
 
-    // Setting multiple preference cookies (list is true, used by handleConsent/handleRejection)
-    this.setCookie("Strictly", "true", 365); // Strictly is always true
-    this.setCookie("Performance", agreedStr, 365);
-    this.setCookie("Analytics", agreedStr, 365);
-    this.setCookie("Marketing", agreedStr, 365);
-    this.setCookie("Functional", agreedStr, 365);
+  /**
+   * Sets a preference cookie for a specific category.
+   * @param {string} categoryName - The name of the cookie category (e.g., "Performance").
+   * @param {boolean} agreed - True if consented, false otherwise.
+   * @param {number} days - Expiry days.
+   * @param {boolean} setAllMode - If true, this call is part of "set all preferences".
+   *                             (This parameter makes the function a bit dual-purpose, consider splitting if too complex)
+   */
+  setPrefCookie(categoryName, agreed, days = 7, setAllMode = false) {
+    // This function was a bit confusing with the `list` parameter.
+    // Let's simplify: this function sets ONE preference cookie.
+    // If you need to set all, call this multiple times.
+    // The `setAllMode` parameter is removed for clarity.
+    // `agreed` is expected to be a boolean.
+    this.setCookie(categoryName, String(agreed), days); // Stores "true" or "false"
   }
 
   updatePreference() {
-    // Block cookies for categories that are NOT checked anymore
-    this.blockNonEssentialCookiesBasedOnPrefs(true); // Pass true to signal it's from update
+    // 1. Block/clear existing application cookies first (preserves pendingCookies)
+    this.blockCookies(); // This populates this.pendingCookies with cookies that were active before this save.
 
-    // Set the main consent cookie to 'yes' since a choice was confirmed
-    this.setCookie("ofcPer", "yes", 365);
+    // 2. Set overall consent to "yes" because user is saving preferences
+    this.setCookie("ofcPer", "yes", 7);
 
-    // Get references to the toggles (Strictly toggle is present but disabled)
-    let pCToggle = document.querySelector("[data-item='js-toggle-pC'] input");
-    let aCToggle = document.querySelector("[data-item='js-toggle-aC'] input");
-    let mCToggle = document.querySelector("[data-item='js-toggle-mC'] input");
-    let fCToggle = document.querySelector("[data-item='js-toggle-fC'] input");
+    // 3. Get toggle states from UI
+    const toggles = this.getToggleInputs();
 
-    // Set individual preference cookies based on current toggle state
-    this.setPrefCookie("Strictly", true); // Force Strictly to true
-    this.setPrefCookie("Performance", pCToggle ? pCToggle.checked : false);
-    this.setPrefCookie("Analytics", aCToggle ? aCToggle.checked : false);
-    this.setPrefCookie("Marketing", mCToggle ? mCToggle.checked : false);
-    this.setPrefCookie("Functional", fCToggle ? fCToggle.checked : false);
+    // 4. Set individual preference cookies based on toggle states
+    this.setPrefCookie("Strictly", true, 7); // Strictly is always true
+    if (toggles.pC) this.setPrefCookie("Performance", toggles.pC.checked, 7);
+    if (toggles.aC) this.setPrefCookie("Analytics", toggles.aC.checked, 7);
+    if (toggles.mC) this.setPrefCookie("Marketing", toggles.mC.checked, 7);
+    if (toggles.fC) this.setPrefCookie("Functional", toggles.fC.checked, 7);
 
-    // Add/Keep cookies for the categories that are now accepted (Strictly + checked ones)
-    // We re-apply them to ensure they are present if they were somehow removed,
-    // and potentially to refresh their expiry? (Though setCookie uses 365 days anyway)
-    let acceptedCookieList = [];
-    this.categorizeCookies(this.csvData); // Re-categorize to get full list based on CSV
+    // 5. Re-apply cookies based on approved categories
+    let approvedCookiesToSet = [];
+    // Always include "Strictly necessary cookies" if they exist in categorized data
+    const strictlyCategoryName = "Strictly necessary cookies"; // Match CSV category name
+    if (this.categorizedCookies[strictlyCategoryName]) {
+      approvedCookiesToSet.push(
+        ...this.categorizedCookies[strictlyCategoryName]
+      );
+    }
+    // Add other categories based on toggles
+    if (
+      toggles.pC &&
+      toggles.pC.checked &&
+      this.categorizedCookies["Performance cookies"]
+    ) {
+      approvedCookiesToSet.push(
+        ...this.categorizedCookies["Performance cookies"]
+      );
+    }
+    if (
+      toggles.aC &&
+      toggles.aC.checked &&
+      this.categorizedCookies["Analytic cookies"]
+    ) {
+      // Ensure "Analytic cookies" matches CSV
+      approvedCookiesToSet.push(...this.categorizedCookies["Analytic cookies"]);
+    }
+    if (
+      toggles.mC &&
+      toggles.mC.checked &&
+      this.categorizedCookies["Marketing cookies"]
+    ) {
+      approvedCookiesToSet.push(
+        ...this.categorizedCookies["Marketing cookies"]
+      );
+    }
+    if (
+      toggles.fC &&
+      toggles.fC.checked &&
+      this.categorizedCookies["Functional cookies"]
+    ) {
+      approvedCookiesToSet.push(
+        ...this.categorizedCookies["Functional cookies"]
+      );
+    }
+    // Also consider cookies from the "Other" category if you want to allow them by default when any consent is given
+    // if (this.categorizedCookies["Other"]) {
+    //   approvedCookiesToSet.push(...this.categorizedCookies["Other"]);
+    // }
 
-    if (this.categorizedCookies["Strictly"]) {
-      acceptedCookieList.push(...this.categorizedCookies["Strictly"]);
-    }
-    if (pCToggle?.checked && this.categorizedCookies["Performance"]) {
-      acceptedCookieList.push(...this.categorizedCookies["Performance"]);
-    }
-    if (aCToggle?.checked && this.categorizedCookies["Analytics"]) {
-      acceptedCookieList.push(...this.categorizedCookies["Analytics"]);
-    }
-    if (mCToggle?.checked && this.categorizedCookies["Marketing"]) {
-      acceptedCookieList.push(...this.categorizedCookies["Marketing"]);
-    }
-    if (fCToggle?.checked && this.categorizedCookies["Functional"]) {
-      acceptedCookieList.push(...this.categorizedCookies["Functional"]);
-    }
-    // Handle 'Other' category - link it to 'Functional' consent for example
-    if (fCToggle?.checked && this.categorizedCookies["Other"]) {
-      acceptedCookieList.push(...this.categorizedCookies["Other"]);
-    }
-
-    // Re-set the approved cookies (ensures they exist with the correct expiry)
-    acceptedCookieList.forEach((cookieString) => {
-      const [name, value] = cookieString.split(/=(.*)/); // Split only on first '='
-      // Avoid re-setting consent/pref cookies here
-      if (
-        name &&
-        name !== "ofcPer" &&
-        ![
-          "Strictly",
-          "Performance",
-          "Analytics",
-          "Marketing",
-          "Functional",
-        ].includes(name)
-      ) {
-        this.setCookie(name, value || "", 365);
+    // Set the approved cookies
+    approvedCookiesToSet.forEach((cookieString) => {
+      const parts = cookieString.split("=");
+      const name = parts[0] ? parts[0].trim() : null;
+      const value = parts.slice(1).join("=").trim(); // Handle values that might contain '='
+      if (name) {
+        this.setCookie(name, value, 7); // Set with 7-day expiry
       }
     });
 
-    // Hide UI elements
+    // Also, ensure any cookies from this.pendingCookies that match approved categories are set
+    // (The current logic already re-applies from categorizedCookies, which is better)
+
+    // 6. UI updates
+    this.hideElement(this.bannerContainer);
     this.hideElement(this.settingsMenu);
-    this.hideElement(this.bannerContainer); // Ensure banner is hidden too
-    this.showElement(this.cookieCrumb); // Show the crumb indicating consent is managed
+    this.showElement(this.cookieCrumb);
   }
+}
 
-  // Helper to block cookies based on current preferences
-  // Pass fromUpdate = true when called from updatePreference to read current toggle state
-  // Otherwise (on load after rejection), it reads saved cookie prefs.
-  blockNonEssentialCookiesBasedOnPrefs(fromUpdate = false) {
-    const currentCookies = document.cookie.split(";");
-    this.categorizeCookies(this.csvData); // Ensure categorization is up-to-date
-
-    let prefs;
-    if (fromUpdate) {
-      // Read current state of toggles if called during update/confirm
-      let pCToggle = document.querySelector("[data-item='js-toggle-pC'] input");
-      let aCToggle = document.querySelector("[data-item='js-toggle-aC'] input");
-      let mCToggle = document.querySelector("[data-item='js-toggle-mC'] input");
-      let fCToggle = document.querySelector("[data-item='js-toggle-fC'] input");
-      prefs = {
-        Strictly: true,
-        Performance: pCToggle ? pCToggle.checked : false,
-        Analytics: aCToggle ? aCToggle.checked : false,
-        Marketing: mCToggle ? mCToggle.checked : false,
-        Functional: fCToggle ? fCToggle.checked : false,
-        Other: fCToggle ? fCToggle.checked : false, // Example: Link 'Other' to 'Functional' consent
-      };
-    } else {
-      // Read saved preference cookies if called on load (e.g., after rejection)
-      prefs = {
-        Strictly: true, // Always true
-        Performance: this.getCookie("Performance") === "true",
-        Analytics: this.getCookie("Analytics") === "true",
-        Marketing: this.getCookie("Marketing") === "true",
-        Functional: this.getCookie("Functional") === "true",
-        Other: this.getCookie("Functional") === "true", // Example: Link 'Other' to 'Functional' consent
-      };
-    }
-
-    currentCookies.forEach((cookie) => {
-      const cookieName = cookie.split("=")[0]
-        ? cookie.split("=")[0].trim()
-        : null;
-      // Skip empty names, the consent cookie, and the preference cookies themselves
-      if (
-        !cookieName ||
-        cookieName === "ofcPer" ||
-        [
-          "Strictly",
-          "Performance",
-          "Analytics",
-          "Marketing",
-          "Functional",
-        ].includes(cookieName)
-      ) {
-        return;
-      }
-
-      // Find the category of the current cookie
-      let cookieCategory = null;
-      for (const category in this.categorizedCookies) {
-        if (
-          this.categorizedCookies[category]?.some((c) =>
-            c.startsWith(cookieName + "=")
-          )
-        ) {
-          cookieCategory = category;
-          break;
-        }
-      }
-      cookieCategory = cookieCategory || "Other"; // Default if not found in specific lists
-
-      // If the preference for this category is explicitly false, delete the cookie
-      if (prefs.hasOwnProperty(cookieCategory) && !prefs[cookieCategory]) {
-        // console.log(
-        //   `Blocking cookie ${cookieName} based on preference for category ${cookieCategory}`
-        // );
-        this.setCookie(cookieName, "", -1);
-      }
-    });
-    // Re-read pending cookies after blocking
-    this.pendingCookies = document.cookie
-      .split(";")
-      .filter((c) => c.trim() !== "");
-  }
-
-  updateToggleStatesFromPrefs() {
-    const setToggle = (dataItem, prefCookieName) => {
-      const toggleInput = document.querySelector(
-        `[data-item='${dataItem}'] input[type='checkbox']`
-      );
-      if (toggleInput && !toggleInput.disabled) {
-        // Check if exists and not disabled
-        toggleInput.checked = this.getCookie(prefCookieName) === "true";
-      }
-      // Ensure Strictly Necessary is always visually checked (it's already disabled)
-      const strictToggleInput = document.querySelector(
-        "[data-item='js-toggle-sNC'] input[type='checkbox']"
-      );
-      if (strictToggleInput) strictToggleInput.checked = true;
-    };
-
-    setToggle("js-toggle-pC", "Performance");
-    setToggle("js-toggle-aC", "Analytics");
-    setToggle("js-toggle-mC", "Marketing");
-    setToggle("js-toggle-fC", "Functional");
-  }
-} // End of Banner Class
-
-// --- Global Functions (remain the same) ---
+// --- Global Helper Functions (Unchanged) ---
 function readCSVFile(fileUrl) {
   return fetch(fileUrl)
     .then((response) => {
       if (!response.ok) {
         throw new Error(
-          `HTTP error! status: ${response.status} while fetching ${fileUrl}`
+          `HTTP error! status: ${response.status} for ${fileUrl}`
         );
       }
       return response.text();
     })
-    .then((csvData) => parseCSV(csvData))
-    .catch((error) => {
-      console.error("Error fetching or parsing CSV:", error);
-      return {}; // Return empty object on error to avoid breaking the Banner constructor
-    });
+    .then((csvData) => parseCSV(csvData));
 }
 
 function parseCSV(csvData) {
   let parsedData = {};
-  if (!csvData) return parsedData; // Handle empty/null CSV data
+  let rows = csvData.split("\n").filter((row) => row.trim() !== ""); // Filter empty rows
 
-  // Split rows, handle potential '\r\n' and '\n' line endings
-  let rows = csvData.trim().split(/\r?\n/);
-  if (rows.length < 2) return parsedData; // No data rows
+  if (rows.length === 0) return parsedData;
 
-  // Extract headers, trim whitespace, handle potential BOM
   let headers = rows
     .shift()
     .split(";")
-    .map((h) => h.trim().replace(/^\uFEFF/, "")); // Remove BOM if present
-  const nameHeader = "Cookie / Data Key name"; // Exact header name for the key
-
-  // Find the index of the key header
-  const keyIndex = headers.indexOf(nameHeader);
-  if (keyIndex === -1) {
-    console.error(`CSV Parse Error: Header "${nameHeader}" not found.`);
-    return parsedData; // Cannot proceed without the key column
-  }
+    .map((h) => h.trim()); // Trim headers
 
   rows.forEach((row) => {
-    if (!row.trim()) return; // Skip empty rows
     let rowData = row.split(";");
     let cookieObj = {};
-    let keyName = null;
+    let cookieNameKey = "";
 
     headers.forEach((header, index) => {
-      const value = rowData[index] ? rowData[index].trim() : ""; // Handle missing data points
-      cookieObj[header] = value;
-      if (index === keyIndex) {
-        keyName = value; // Get the cookie name from the correct column
+      try {
+        const value = rowData[index] ? rowData[index].trim() : "";
+        cookieObj[header] = value;
+        if (header === "Cookie / Data Key name") {
+          // Ensure this matches your CSV header
+          cookieNameKey = value;
+        }
+      } catch (error) {
+        // console.warn("Error parsing row cell:", error, rowData, header, index);
       }
     });
 
-    // Use cookie name as key for parsedData, only if a valid key was found
-    if (keyName) {
-      parsedData[keyName] = cookieObj;
-    } else {
-      // console.warn("CSV Parse Warning: Row skipped, missing key name:", row);
+    if (cookieNameKey) {
+      // Only add if a cookie name was found
+      parsedData[cookieNameKey] = cookieObj;
     }
   });
-
   return parsedData;
 }
 
-// --- Initialization (remains the same) ---
-document.addEventListener("DOMContentLoaded", () => {
-  readCSVFile(
-    "https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/open-cookie-database.csv"
-  )
-    .then((data) => {
-      if (Object.keys(data).length > 0) {
-        // Only initialize if data was loaded
-        window.ofcBanner = new Banner(data); // Assign to window for potential debugging access
-      } else {
-        console.error(
-          "Cookie banner initialization failed: No data loaded from CSV."
-        );
-      }
-    })
-    .catch((error) => {
-      // Error handling is now primarily inside readCSVFile, but catch potential promise rejections here too
-      console.error("Error initializing cookie banner:", error);
-    });
-});
+// --- Initialization ---
+readCSVFile(
+  "https://raw.githubusercontent.com/JoshOpenform/cookieCDN/main/open-cookie-database.csv"
+)
+  .then((data) => {
+    if (Object.keys(data).length === 0) {
+      console.warn(
+        "CSV data is empty or could not be parsed correctly. Banner might not categorize cookies effectively."
+      );
+    }
+    const banner = new Banner(data);
+  })
+  .catch((error) => {
+    console.error("Failed to initialize banner with CSV data:", error);
+    // Initialize banner with empty data or default behavior if CSV fails
+    // const banner = new Banner({});
+  });
