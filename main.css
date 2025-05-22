@@ -275,7 +275,7 @@ img.lock-icon {
 
 .settings .cookie-button::before {
   content: "";
-  background-image: url(cog_icon.svg);
+  background-image: url(images/cog_icon.svg);
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
