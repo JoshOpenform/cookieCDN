@@ -253,6 +253,13 @@ class Banner {
     document.body.appendChild(containerNode);
     document.body.appendChild(settingsNode);
     document.body.appendChild(cookieNode);
+
+    //peterd hot fix
+    const button = document.querySelector('[data-item="js-reject-button"]');
+    if (button) {
+      button.textContent = 'DECLINE';
+    }
+    
   }
 
   showElement(element) {
